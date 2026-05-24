@@ -3065,7 +3065,7 @@ La distribución hipergeométrica original presenta discreción y asimetría. Si
 
 El Teorema del Límite Central demuestra que, independientemente de la distribución original de los datos, las medias muestrales tienden a distribuirse normalmente cuando el tamaño de la muestra es suficientemente grande. Esto permite aplicar métodos basados en la distribución normal en una enorme cantidad de problemas estadísticos.
 
-# Aplicación Interactiva de Distribuciones Continuas
+# Aplicación Interactiva de Distribuciones Continuas y TLC
 
 Aquí se presenta una aplicación interactiva desarrollada con Shiny que permite explorar distintas distribuciones continuas y visualizar probabilidades de manera dinámica.
 
@@ -4785,3 +4785,5 @@ grid::grid.text(
   
 )
 ```
+
+# Referencias
