@@ -102,7 +102,7 @@ library(latex2exp)
 
 ```
 
-[@tidyverse; @kableExtra; @knitr; @dplyr; @ggplot2; @psych; @readxl]
+[@tidyverse; @kableExtra; @knitr; @dplyr; @ggplot2; @psych; @readxl;@chatgpt]
 
 # .Introduccion
 
@@ -1851,41 +1851,6 @@ La región sombreada representa el 5% del área total ubicado en la cola derecha
 :::
 ::::::
 
-**Tabla de resultados**
-
-```{r}
-tabla <- data.frame(
-  Inciso = c("a","b","c"),
-  `Grados de libertad` = c(15,7,24),
-  `α` = c(0.025,0.01,0.05),
-  `χ² crítico` = c(
-    chi_a,
-    chi_b,
-    chi_c
-  ),
-  check.names = FALSE
-)
-
-tabla$`χ² crítico` <- as.numeric(tabla$`χ² crítico`)
-tabla$`χ² crítico` <- round(tabla$`χ² crítico`,5)
-
-kbl(
-  tabla,
-  format = "html",
-  align = "c"
-) %>%
-  add_header_above(
-    c("Resultados de valores críticos χ²" = 4),
-    background = "#1F4E79",
-    color = "white",
-    bold = TRUE
-  ) %>%
-  kable_styling(
-    full_width = FALSE,
-    position = "center"
-  )
-```
-
 **Ejercicio 8.41**
 
 Para una distribución chi cuadrada encuentre $\chi_\alpha^2$ tal que
@@ -3118,7 +3083,6 @@ fluidRow(
       
       h4("Configuración"),
       
-      
       # DISTRIBUCIONES
       
       selectInput(
@@ -3134,32 +3098,19 @@ fluidRow(
         )
       ),
       
-      
       # PARÁMETROS
       
       uiOutput("parametros"),
       
-      
       # TIPO DE PROBABILIDAD
+      # Se oculta automáticamente cuando la distribución es TLC
       
-      radioButtons(
-        "tipo_prob",
-        "Tipo de probabilidad",
-        
-        choices = c(
-          "P(X ≤ a)" = "menor",
-          "P(X ≥ a)" = "mayor",
-          "P(a ≤ X ≤ b)" = "entre"
-        ),
-        
-        selected = "menor"
-      ),
-      
+      uiOutput("tipo_prob_ui"),
       
       # LÍMITES
+      # Se oculta automáticamente cuando la distribución es TLC
       
       uiOutput("limites"),
-      
       
       # TÍTULO
       
@@ -3173,36 +3124,34 @@ fluidRow(
     
   ),
   
-  
   # =====================================
   # PANEL DERECHO
   # =====================================
   
-column(
-  width = 9,
+  column(
+    width = 9,
+    
+    uiOutput("formula"),
+    
+    plotly::plotlyOutput(
+      "grafica",
+      height = "650px"
+    ),
+    
+    br(),
+    
+    htmlOutput("resultado_prob"),
+    
+    br(),
+    
+    downloadButton(
+      "descargar_reporte",
+      "Descargar PNG"
+    )
+    
+  )
   
-  uiOutput("formula"),
-  
-  plotly::plotlyOutput(
-    "grafica",
-    height = "650px"
-  ),
-  
-  br(),
-  
-  htmlOutput("resultado_prob"),
-  br(),
-
-downloadButton(
-  "descargar_reporte",
-  "Descargar PNG"
 )
-
-)
-
-)
-
-
 ```
 
 ```{r context="server", echo=FALSE}
@@ -3240,89 +3189,109 @@ output$parametros <- renderUI({
     
   }
   
-  
-else if(input$distribucion == "Chi Cuadrado"){
-  
-  numericInput(
-    "gl_chi",
-    "Grados de libertad",
-    value = 5,
-    min = 1
-  )
-  
-}
-
-  
-  
-else if(input$distribucion == "F Fisher"){
-  
-  tagList(
+  else if(input$distribucion == "Chi Cuadrado"){
     
     numericInput(
-      "gl1",
-      "Grados de libertad numerador",
+      "gl_chi",
+      "Grados de libertad",
       value = 5,
       min = 1
-    ),
-    
-    numericInput(
-      "gl2",
-      "Grados de libertad denominador",
-      value = 10,
-      min = 1
     )
     
-  )
+  }
   
-}
-
-  
-  
-
-else if(input$distribucion == "TLC"){
-  
-  tagList(
+  else if(input$distribucion == "F Fisher"){
     
-    numericInput(
-      "n",
-      "Tamaño de muestra",
-      value = 30,
-      min = 1
-    ),
-    
-    numericInput(
-      "simulaciones",
-      "Número de simulaciones",
-      value = 1000,
-      min = 100
-    ),
-    
-    numericInput(
-      "k_binomial",
-      "Número de ensayos binomial (k)",
-      value = 10,
-      min = 1
-    ),
-    
-    numericInput(
-      "p_binomial",
-      "Probabilidad de éxito (p)",
-      value = 0.35,
-      min = 0,
-      max = 1,
-      step = 0.01
+    tagList(
+      
+      numericInput(
+        "gl1",
+        "Grados de libertad numerador",
+        value = 5,
+        min = 1
+      ),
+      
+      numericInput(
+        "gl2",
+        "Grados de libertad denominador",
+        value = 10,
+        min = 1
+      )
+      
     )
     
-  )
+  }
   
-}
+  else if(input$distribucion == "TLC"){
+    
+    tagList(
+      
+      numericInput(
+        "n",
+        "Tamaño de muestra",
+        value = 30,
+        min = 1
+      ),
+      
+      numericInput(
+        "simulaciones",
+        "Número de simulaciones",
+        value = 1000,
+        min = 100
+      ),
+      
+      numericInput(
+        "k_binomial",
+        "Número de ensayos binomial (k)",
+        value = 10,
+        min = 1
+      ),
+      
+      numericInput(
+        "p_binomial",
+        "Probabilidad de éxito (p)",
+        value = 0.35,
+        min = 0,
+        max = 1,
+        step = 0.01
+      )
+      
+    )
+    
+  }
   
 })
+```
 
+```{r context="server", echo=FALSE}
+output$tipo_prob_ui <- renderUI({
+  
+  if(input$distribucion == "TLC"){
+    return(NULL)
+  }
+  
+  radioButtons(
+    "tipo_prob",
+    "Tipo de probabilidad",
+    
+    choices = c(
+      "P(X ≤ a)" = "menor",
+      "P(X ≥ a)" = "mayor",
+      "P(a ≤ X ≤ b)" = "entre"
+    ),
+    
+    selected = "menor"
+  )
+  
+})
 ```
 
 ```{r context="server", echo=FALSE}
 output$limites <- renderUI({
+  
+  if(input$distribucion == "TLC"){
+    return(NULL)
+  }
   
   if(input$tipo_prob == "menor"){
     
@@ -3368,23 +3337,21 @@ output$limites <- renderUI({
 ```
 
 ```{r context="server", echo=FALSE}
-
 output$formula <- renderUI({
   
   formula <- ""
   
   if(input$distribucion == "Normal"){
-  
-  formula <- paste0(
     
-    "$$Z=\\frac{X-\\mu}{\\sigma}$$",
+    formula <- paste0(
+      
+      "$$Z=\\frac{X-\\mu}{\\sigma}$$",
+      
+      "$$f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}$$"
+      
+    )
     
-    
-    "$$f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}$$"
-    
-  )
-  
-}
+  }
   
   else if(input$distribucion == "T Student"){
     
@@ -3426,35 +3393,32 @@ output$formula <- renderUI({
       ",
       
       tagList(
-  
-  tags$h3(
-    "Fórmula:",
-    
-    style = "
-    color:#444444;
-    margin-bottom:15px;
-    font-weight:bold;
-    "
-  ),
-  
-  withMathJax(formula)
-  
-)
+        
+        tags$h3(
+          "Fórmula:",
+          
+          style = "
+          color:#444444;
+          margin-bottom:15px;
+          font-weight:bold;
+          "
+        ),
+        
+        withMathJax(formula)
+        
+      )
       
     )
     
   )
   
 })
-
-
 ```
 
 ```{r context="server", echo=FALSE}
 output$resultado_prob <- renderUI({
   
   texto <- ""
-  
   
   # =====================================
   # DISTRIBUCIÓN NORMAL
@@ -3464,12 +3428,10 @@ output$resultado_prob <- renderUI({
     
     req(input$media)
     req(input$desviacion)
+    req(input$tipo_prob)
     
     media <- input$media
     desviacion <- input$desviacion
-    
-    
-    # MENOR QUE
     
     if(input$tipo_prob == "menor"){
       
@@ -3489,9 +3451,6 @@ output$resultado_prob <- renderUI({
       )
       
     }
-    
-    
-    # MAYOR QUE
     
     else if(input$tipo_prob == "mayor"){
       
@@ -3512,9 +3471,6 @@ output$resultado_prob <- renderUI({
       
     }
     
-    
-    # ENTRE DOS VALORES
-    
     else if(input$tipo_prob == "entre"){
       
       req(input$limite_inferior)
@@ -3525,7 +3481,6 @@ output$resultado_prob <- renderUI({
         mean = media,
         sd = desviacion
       ) -
-        
         pnorm(
           input$limite_inferior,
           mean = media,
@@ -3545,7 +3500,6 @@ output$resultado_prob <- renderUI({
     
   }
   
-  
   # =====================================
   # T STUDENT
   # =====================================
@@ -3553,9 +3507,9 @@ output$resultado_prob <- renderUI({
   else if(input$distribucion == "T Student"){
     
     req(input$gl)
+    req(input$tipo_prob)
     
     gl <- input$gl
-    
     
     if(input$tipo_prob == "menor"){
       
@@ -3572,7 +3526,6 @@ output$resultado_prob <- renderUI({
       
     }
     
-    
     else if(input$tipo_prob == "mayor"){
       
       req(input$limite)
@@ -3587,7 +3540,6 @@ output$resultado_prob <- renderUI({
       )
       
     }
-    
     
     else if(input$tipo_prob == "entre"){
       
@@ -3610,7 +3562,6 @@ output$resultado_prob <- renderUI({
     
   }
   
-  
   # =====================================
   # CHI CUADRADO
   # =====================================
@@ -3618,9 +3569,9 @@ output$resultado_prob <- renderUI({
   else if(input$distribucion == "Chi Cuadrado"){
     
     req(input$gl_chi)
+    req(input$tipo_prob)
     
     gl <- input$gl_chi
-    
     
     if(input$tipo_prob == "menor"){
       
@@ -3637,7 +3588,6 @@ output$resultado_prob <- renderUI({
       
     }
     
-    
     else if(input$tipo_prob == "mayor"){
       
       req(input$limite)
@@ -3652,7 +3602,6 @@ output$resultado_prob <- renderUI({
       )
       
     }
-    
     
     else if(input$tipo_prob == "entre"){
       
@@ -3675,7 +3624,6 @@ output$resultado_prob <- renderUI({
     
   }
   
-  
   # =====================================
   # F FISHER
   # =====================================
@@ -3684,10 +3632,10 @@ output$resultado_prob <- renderUI({
     
     req(input$gl1)
     req(input$gl2)
+    req(input$tipo_prob)
     
     gl1 <- input$gl1
     gl2 <- input$gl2
-    
     
     if(input$tipo_prob == "menor"){
       
@@ -3708,7 +3656,6 @@ output$resultado_prob <- renderUI({
       
     }
     
-    
     else if(input$tipo_prob == "mayor"){
       
       req(input$limite)
@@ -3728,7 +3675,6 @@ output$resultado_prob <- renderUI({
       
     }
     
-    
     else if(input$tipo_prob == "entre"){
       
       req(input$limite_inferior)
@@ -3739,7 +3685,6 @@ output$resultado_prob <- renderUI({
         df1 = gl1,
         df2 = gl2
       ) -
-        
         pf(
           input$limite_inferior,
           df1 = gl1,
@@ -3759,47 +3704,62 @@ output$resultado_prob <- renderUI({
     
   }
   
-  
   # =====================================
   # TLC
   # =====================================
   
   else if(input$distribucion == "TLC"){
     
+    req(input$n)
+    req(input$simulaciones)
+    req(input$k_binomial)
+    req(input$p_binomial)
+    
+    media_teorica <- input$k_binomial * input$p_binomial
+    
+    desviacion_teorica <- sqrt(
+      (
+        input$k_binomial *
+        input$p_binomial *
+        (1 - input$p_binomial)
+      ) / input$n
+    )
+    
     texto <- paste0(
+      
       "Simulación realizada con ",
       input$simulaciones,
       " muestras de tamaño ",
-      input$n
+      input$n,
+      
+      "<br><br>",
+      
+      "Media teórica de las medias muestrales = ",
+      round(media_teorica, 4),
+      
+      "<br>",
+      
+      "Desviación estándar teórica de las medias muestrales = ",
+      round(desviacion_teorica, 4)
+      
     )
     
   }
-  
   
   HTML(
     
     paste0(
       
       "<div style='
-      
       background-color:#f8f9fa;
-      
       padding:18px;
-      
       border-radius:12px;
-      
       font-size:24px;
-      
       font-weight:bold;
-      
       text-align:center;
-      
       color:#003366;
-      
       border:2px solid #d6d6d6;
-      
       margin-top:10px;
-      
       '>",
       
       texto,
@@ -3814,7 +3774,6 @@ output$resultado_prob <- renderUI({
 ```
 
 ```{r context="server", echo=FALSE}
-
 grafica_base <- reactive({
   
   # =====================================
@@ -3825,6 +3784,7 @@ grafica_base <- reactive({
     
     req(input$media)
     req(input$desviacion)
+    req(input$tipo_prob)
     
     media <- input$media
     desviacion <- input$desviacion
@@ -3843,14 +3803,11 @@ grafica_base <- reactive({
       datos,
       ggplot2::aes(x = x, y = y)
     ) +
-      
       ggplot2::geom_line(
         linewidth = 1.5,
         color = "#0033ff"
       ) +
-      
       ggplot2::theme_minimal(base_size = 15) +
-      
       ggplot2::theme(
         plot.title = ggplot2::element_text(
           face = "bold",
@@ -3858,28 +3815,24 @@ grafica_base <- reactive({
           hjust = 0.5
         )
       ) +
-      
       ggplot2::labs(
-        title = input$titulo_grafica,
+        title = stringr::str_wrap(input$titulo_grafica, width = 45),
         x = "Valores",
         y = "Densidad"
       )
     
-    
-    # MENOR
-    
     if(input$tipo_prob == "menor"){
+      
+      req(input$limite)
       
       sombra <- subset(datos, x <= input$limite)
       
       grafica <- grafica +
-        
         ggplot2::geom_area(
           data = sombra,
           fill = "#4a90e2",
           alpha = 0.45
         ) +
-        
         ggplot2::geom_vline(
           xintercept = input$limite,
           linetype = "dashed",
@@ -3889,21 +3842,18 @@ grafica_base <- reactive({
       
     }
     
-    
-    # MAYOR
-    
     else if(input$tipo_prob == "mayor"){
+      
+      req(input$limite)
       
       sombra <- subset(datos, x >= input$limite)
       
       grafica <- grafica +
-        
         ggplot2::geom_area(
           data = sombra,
           fill = "#4a90e2",
           alpha = 0.45
         ) +
-        
         ggplot2::geom_vline(
           xintercept = input$limite,
           linetype = "dashed",
@@ -3913,10 +3863,10 @@ grafica_base <- reactive({
       
     }
     
-    
-    # ENTRE
-    
     else if(input$tipo_prob == "entre"){
+      
+      req(input$limite_inferior)
+      req(input$limite_superior)
       
       sombra <- subset(
         datos,
@@ -3925,13 +3875,11 @@ grafica_base <- reactive({
       )
       
       grafica <- grafica +
-        
         ggplot2::geom_area(
           data = sombra,
           fill = "#4a90e2",
           alpha = 0.45
         ) +
-        
         ggplot2::geom_vline(
           xintercept = c(
             input$limite_inferior,
@@ -3946,7 +3894,6 @@ grafica_base <- reactive({
     
   }
   
-  
   # =====================================
   # T STUDENT
   # =====================================
@@ -3954,6 +3901,7 @@ grafica_base <- reactive({
   else if(input$distribucion == "T Student"){
     
     req(input$gl)
+    req(input$tipo_prob)
     
     gl <- input$gl
     
@@ -3968,25 +3916,32 @@ grafica_base <- reactive({
     datos <- data.frame(x, y)
     
     grafica <- ggplot2::ggplot(
-      datos,
-      ggplot2::aes(x = x, y = y)
-    ) +
-      
-      ggplot2::geom_line(
-        linewidth = 1.5,
-        color = "#009933"
-      ) +
-      
-      ggplot2::theme_minimal(base_size = 15) +
-      
-      ggplot2::labs(
-        title = input$titulo_grafica,
-        x = "Valores",
-        y = "Densidad"
-      )
-    
+  datos,
+  ggplot2::aes(x = x, y = y)
+) +
+  ggplot2::geom_line(
+    linewidth = 1.5,
+    color = "#009933"
+  ) +
+  ggplot2::theme_minimal(base_size = 15) +
+  
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(
+      face = "bold",
+      size = 20,
+      hjust = 0.5
+    )
+  ) +
+  
+  ggplot2::labs(
+    title = stringr::str_wrap(input$titulo_grafica, width = 45),
+    x = "Valores",
+    y = "Densidad"
+  )
     
     if(input$tipo_prob == "menor"){
+      
+      req(input$limite)
       
       sombra <- subset(datos, x <= input$limite)
       
@@ -4004,8 +3959,9 @@ grafica_base <- reactive({
       
     }
     
-    
     else if(input$tipo_prob == "mayor"){
+      
+      req(input$limite)
       
       sombra <- subset(datos, x >= input$limite)
       
@@ -4023,8 +3979,10 @@ grafica_base <- reactive({
       
     }
     
-    
     else{
+      
+      req(input$limite_inferior)
+      req(input$limite_superior)
       
       sombra <- subset(
         datos,
@@ -4051,7 +4009,6 @@ grafica_base <- reactive({
     
   }
   
-  
   # =====================================
   # CHI CUADRADO
   # =====================================
@@ -4059,6 +4016,7 @@ grafica_base <- reactive({
   else if(input$distribucion == "Chi Cuadrado"){
     
     req(input$gl_chi)
+    req(input$tipo_prob)
     
     gl <- input$gl_chi
     
@@ -4073,25 +4031,31 @@ grafica_base <- reactive({
     datos <- data.frame(x, y)
     
     grafica <- ggplot2::ggplot(
-      datos,
-      ggplot2::aes(x = x, y = y)
-    ) +
-      
-      ggplot2::geom_line(
-        linewidth = 1.5,
-        color = "#cc6600"
-      ) +
-      
-      ggplot2::theme_minimal(base_size = 15) +
-      
-      ggplot2::labs(
-        title = input$titulo_grafica,
-        x = "Valores",
-        y = "Densidad"
-      )
-    
-    
+  datos,
+  ggplot2::aes(x = x, y = y)
+) +
+  ggplot2::geom_line(
+    linewidth = 1.5,
+    color = "#cc6600"
+  ) +
+  ggplot2::theme_minimal(base_size = 15) +
+  
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(
+      face = "bold",
+      size = 20,
+      hjust = 0.5
+    )
+  ) +
+  
+  ggplot2::labs(
+    title = stringr::str_wrap(input$titulo_grafica, width = 45),
+    x = "Valores",
+    y = "Densidad"
+  )
     if(input$tipo_prob == "menor"){
+      
+      req(input$limite)
       
       sombra <- subset(datos, x <= input$limite)
       
@@ -4109,8 +4073,9 @@ grafica_base <- reactive({
       
     }
     
-    
     else if(input$tipo_prob == "mayor"){
+      
+      req(input$limite)
       
       sombra <- subset(datos, x >= input$limite)
       
@@ -4128,8 +4093,10 @@ grafica_base <- reactive({
       
     }
     
-    
     else{
+      
+      req(input$limite_inferior)
+      req(input$limite_superior)
       
       sombra <- subset(
         datos,
@@ -4156,7 +4123,6 @@ grafica_base <- reactive({
     
   }
   
-  
   # =====================================
   # F FISHER
   # =====================================
@@ -4165,6 +4131,7 @@ grafica_base <- reactive({
     
     req(input$gl1)
     req(input$gl2)
+    req(input$tipo_prob)
     
     gl1 <- input$gl1
     gl2 <- input$gl2
@@ -4180,25 +4147,32 @@ grafica_base <- reactive({
     datos <- data.frame(x, y)
     
     grafica <- ggplot2::ggplot(
-      datos,
-      ggplot2::aes(x = x, y = y)
-    ) +
-      
-      ggplot2::geom_line(
-        linewidth = 1.5,
-        color = "#9900cc"
-      ) +
-      
-      ggplot2::theme_minimal(base_size = 15) +
-      
-      ggplot2::labs(
-        title = input$titulo_grafica,
-        x = "Valores",
-        y = "Densidad"
-      )
-    
+  datos,
+  ggplot2::aes(x = x, y = y)
+) +
+  ggplot2::geom_line(
+    linewidth = 1.5,
+    color = "#9900cc"
+  ) +
+  ggplot2::theme_minimal(base_size = 15) +
+  
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(
+      face = "bold",
+      size = 20,
+      hjust = 0.5
+    )
+  ) +
+  
+  ggplot2::labs(
+    title = stringr::str_wrap(input$titulo_grafica, width = 45),
+    x = "Valores",
+    y = "Densidad"
+  )
     
     if(input$tipo_prob == "menor"){
+      
+      req(input$limite)
       
       sombra <- subset(datos, x <= input$limite)
       
@@ -4216,8 +4190,9 @@ grafica_base <- reactive({
       
     }
     
-    
     else if(input$tipo_prob == "mayor"){
+      
+      req(input$limite)
       
       sombra <- subset(datos, x >= input$limite)
       
@@ -4235,8 +4210,10 @@ grafica_base <- reactive({
       
     }
     
-    
     else{
+      
+      req(input$limite_inferior)
+      req(input$limite_superior)
       
       sombra <- subset(
         datos,
@@ -4263,7 +4240,6 @@ grafica_base <- reactive({
     
   }
   
-  
   # =====================================
   # TLC
   # =====================================
@@ -4272,6 +4248,8 @@ grafica_base <- reactive({
     
     req(input$n)
     req(input$simulaciones)
+    req(input$k_binomial)
+    req(input$p_binomial)
     
     medias <- replicate(
       input$simulaciones,
@@ -4288,33 +4266,91 @@ grafica_base <- reactive({
     
     datos <- data.frame(medias = medias)
     
-    grafica <- ggplot2::ggplot(
-      datos,
-      ggplot2::aes(x = medias)
-    ) +
-      
-      ggplot2::geom_histogram(
-        ggplot2::aes(y = ..density..),
-        bins = 30,
-        fill = "#91cc02",
-        color = "white"
-      ) +
-      
-      ggplot2::theme_minimal(base_size = 15) +
-      
-      ggplot2::labs(
-        title = input$titulo_grafica,
-        x = "Media",
-        y = "Densidad"
+    media_teorica <- input$k_binomial * input$p_binomial
+    
+    desviacion_teorica <- sqrt(
+      (
+        input$k_binomial *
+        input$p_binomial *
+        (1 - input$p_binomial)
+      ) / input$n
+    )
+    
+    x_normal <- seq(
+      min(medias),
+      max(medias),
+      length.out = 1000
+    )
+    
+    df_normal <- data.frame(
+      x = x_normal,
+      y = dnorm(
+        x_normal,
+        mean = media_teorica,
+        sd = desviacion_teorica
       )
+    )
+    
+    grafica <- ggplot2::ggplot(
+  datos,
+  ggplot2::aes(x = medias)
+) +
+  
+  ggplot2::geom_histogram(
+    ggplot2::aes(y = ..density..),
+    bins = 30,
+    fill = "#91cc02",
+    color = "white",
+    alpha = 0.75
+  ) +
+  
+  ggplot2::geom_line(
+    data = df_normal,
+    ggplot2::aes(x = x, y = y),
+    color = "red",
+    linewidth = 1.3
+  ) +
+  
+  ggplot2::geom_vline(
+    xintercept = media_teorica,
+    linetype = "dashed",
+    color = "#003366",
+    linewidth = 1.2
+  ) +
+  
+  ggplot2::theme_minimal(base_size = 15) +
+  
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(
+      face = "bold",
+      size = 20,
+      hjust = 0.5
+    ),
+    
+    plot.subtitle = ggplot2::element_text(
+      hjust = 0.5,
+      size = 12,
+      face = "italic"
+    )
+  ) +
+  
+  ggplot2::labs(
+    title = stringr::str_wrap(input$titulo_grafica, width = 45),
+    
+    subtitle = paste0(
+      "TLC: distribución de medias muestrales | Media teórica = ",
+      round(media_teorica, 4)
+    ),
+    
+    x = "Media muestral",
+    y = "Densidad"
+  )
     
   }
   
   grafica
   
 })
-
-
 
 output$grafica <- plotly::renderPlotly({
   
@@ -4343,11 +4379,9 @@ output$grafica <- plotly::renderPlotly({
   )
   
 })
-
 ```
 
 ```{r context="server", echo=FALSE}
-
 output$descargar_reporte <- downloadHandler(
   
   filename = function() {
@@ -4371,7 +4405,6 @@ output$descargar_reporte <- downloadHandler(
     resultado <- ""
     formula_texto <- ""
     formula_mostrar <- ""
-    
     
     # =====================================
     # NORMAL
@@ -4439,7 +4472,6 @@ output$descargar_reporte <- downloadHandler(
       
     }
     
-    
     # =====================================
     # T STUDENT
     # =====================================
@@ -4489,7 +4521,6 @@ output$descargar_reporte <- downloadHandler(
       }
       
     }
-    
     
     # =====================================
     # CHI CUADRADO
@@ -4547,7 +4578,6 @@ output$descargar_reporte <- downloadHandler(
       
     }
     
-    
     # =====================================
     # F FISHER
     # =====================================
@@ -4556,7 +4586,8 @@ output$descargar_reporte <- downloadHandler(
       
       formula_texto <- "Distribución F Fisher"
       
-      formula_mostrar <- "$F=\\frac{(X/v_1)}{(Y/v_2)}$"    
+      formula_mostrar <- "$F=\\frac{(X/v_1)}{(Y/v_2)}$"
+      
       if(input$tipo_prob == "menor"){
         
         prob <- pf(
@@ -4613,7 +4644,6 @@ output$descargar_reporte <- downloadHandler(
       
     }
     
-    
     # =====================================
     # TLC
     # =====================================
@@ -4624,15 +4654,29 @@ output$descargar_reporte <- downloadHandler(
       
       formula_mostrar <- "$\\bar{X}\\approx N(\\mu,\\frac{\\sigma}{\\sqrt{n}})$"
       
-      resultado <- paste0(
-        "Simulación con ",
-        input$simulaciones,
-        " muestras de tamaño ",
-        input$n
+      media_teorica <- input$k_binomial * input$p_binomial
+      
+      desviacion_teorica <- sqrt(
+        (
+          input$k_binomial *
+          input$p_binomial *
+          (1 - input$p_binomial)
+        ) / input$n
       )
       
+      resultado <- paste0(
+  "Simulación con ",
+  input$simulaciones,
+  " muestras de tamaño ",
+  input$n,
+  "\n",
+  "Media teórica = ",
+  round(media_teorica, 4),
+  " | Desviación estándar teórica = ",
+  round(desviacion_teorica, 4)
+)
+      
     }
-    
     
     # =====================================
     # CREAR PNG
@@ -4648,19 +4692,20 @@ output$descargar_reporte <- downloadHandler(
     
     grid::grid.newpage()
     
-    
     # TÍTULO
     
-    grid::grid.text(
-      formula_texto,
-      y = 0.96,
-      gp = grid::gpar(
-        fontsize = 26,
-        fontface = "bold",
-        col = "#003366"
-      )
-    )
-    
+    titulo_ajustado <- paste(strwrap(formula_texto, width = 32), collapse = "\n")
+
+grid::grid.text(
+  titulo_ajustado,
+  y = 0.96,
+  gp = grid::gpar(
+    fontsize = 24,
+    fontface = "bold",
+    col = "#003366",
+    lineheight = 0.9
+  )
+)
     
     # SUBTÍTULO
     
@@ -4673,7 +4718,6 @@ output$descargar_reporte <- downloadHandler(
         col = "#444444"
       )
     )
-    
     
     # FÓRMULA
     
@@ -4694,41 +4738,50 @@ output$descargar_reporte <- downloadHandler(
       
     )
     
-    
     # RESULTADO
     
-    grid::grid.text(
-      resultado,
-      y = 0.75,
-      gp = grid::gpar(
-        fontsize = 22,
-        fontface = "bold",
-        col = "#003366"
-      )
+    if(input$distribucion == "TLC"){
+  
+  grid::grid.text(
+    resultado,
+    y = 0.74,
+    gp = grid::gpar(
+      fontsize = 16,
+      fontface = "bold",
+      col = "#003366",
+      lineheight = 1.1
     )
-    
+  )
+  
+} else{
+  
+  grid::grid.text(
+    resultado,
+    y = 0.75,
+    gp = grid::gpar(
+      fontsize = 18,
+      fontface = "bold",
+      col = "#003366"
+    )
+  )
+  
+}
     
     # GRÁFICA
     
     print(
-      
-      grafica_base(),
-      
-      vp = grid::viewport(
-        x = 0.5,
-        y = 0.32,
-        width = 0.90,
-        height = 0.55
-      )
-      
-    )
-    
+  grafica_base(),
+  vp = grid::viewport(
+    x = 0.5,
+    y = 0.34,
+    width = 0.92,
+    height = 0.68
+  )
+)
     
     dev.off()
     
   }
   
 )
-
-
 ```
