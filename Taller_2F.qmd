@@ -1,0 +1,4734 @@
+---
+title: "Modelos Continuos y TLC"
+subtitle: "TALLER 2"
+server: shiny
+author: 
+  - name: Andres David Ruiz Loaiza<br>Edna Valentina Calderon<br>Yery Alexandra Cañas Osorio
+    affiliation: "Universidad del Tolima"
+    affiliation-url: "https://www.ut.edu.co/"
+date: today
+lang: es
+title-block-banner: "#4577d1"
+
+format:
+  html:
+    page-layout: full
+    fontsize: 14pt
+    toc: true
+    toc-location: right
+    number-sections: true
+    code-fold: true
+    code-summary: "Ver código"
+    theme: dark
+    highlight-style: monokai
+    html-math-method: katex
+    smooth-scroll: true
+    link-external-newwindow: true
+    code-overflow: scroll
+    favicon: favicon.ico
+    
+editor: visual
+
+knitr:
+  opts_chunk:
+    message: false
+    warning: false
+    fig.align: center
+    fig.width: 6
+    fig.height: 6
+    out.width: "70%"
+bibliography: references.bib
+---
+
+```{r setup}
+options(
+  knitr.table.format = "html",
+  scipen = 999
+)
+```
+
+```{r echo=FALSE}
+htmltools::tags$div(
+  style = "
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    z-index: 999999;
+  ",
+  htmltools::tags$img(
+    src = "www/Logo_ut.png",
+    style = "width:150px;"
+  )
+)
+```
+
+```{=html}
+<style>
+body{
+  background-color:#f7f6ed;
+  font-size:130%;
+  text-align:justify;
+}
+</style>
+```
+
+# .Cargar paquetes
+
+```{r}
+ipak <- function(pkg){
+
+  options(repos = c(CRAN="https://cloud.r-project.org"))
+
+  new.pkg <- pkg[!(pkg %in% rownames(installed.packages()))]
+
+  if(length(new.pkg)) install.packages(new.pkg, dependencies = TRUE)
+
+  invisible(lapply(pkg, function(p)
+    suppressPackageStartupMessages(library(p, character.only = TRUE))
+  ))
+}
+
+packages <- c("tidyverse","kableExtra","knitr","dplyr","ggplot2","psych","readxl","shiny","plotly")
+
+ipak(packages)
+
+library(plotly)
+
+library(shiny)
+library(ggplot2)
+library(plotly)
+library(grid)
+library(latex2exp)
+
+```
+
+[@tidyverse; @kableExtra; @knitr; @dplyr; @ggplot2; @psych; @readxl]
+
+# .Introduccion
+
+Los modelos continuos de probabilidad representan una herramienta fundamental en la estadística, ya que permiten describir el comportamiento de variables aleatorias presentes en fenómenos naturales, económicos, sociales y científicos. Entre los más importantes se encuentran la distribución normal, ji-cuadrado, t de Student y F de Fisher, las cuales son ampliamente utilizadas en procesos de estimación, análisis de varianza y pruebas de hipótesis.
+
+De igual manera, el Teorema del Límite Central (TLC) constituye uno de los principios más relevantes de la estadística inferencial, al establecer que las medias muestrales tienden a seguir una distribución normal cuando el tamaño de la muestra es suficientemente grande. Gracias a ello, estas distribuciones se convierten en herramientas esenciales para el análisis e interpretación de datos.
+
+# .Distribucion Normal
+
+La distribución normal, también conocida como distribución gaussiana o campana de Gauss, es la distribución de probabilidad continua más importante en la estadística.
+
+Su importancia radica en que muchos fenómenos naturales, sociales y económicos siguen este patrón.
+
+La distribución normal es la distribución de probabilidad continua más usada en estadística y una herramienta fundamental para modelar una inmensa variedad de fenómenos en las ciencias, la ingeniería y la economía. Su popularidad se debe a una propiedad matemática conocida como el Teorema del Límite Central, que establece que la suma o el promedio de un gran número de variables aleatorias independientes tiende a seguir una distribución normal.
+
+**Características Clave**
+
+La distribución normal es un tipo de distribución de probabilidad continua. Esto significa que la variable aleatoria puede tomar cualquier valor dentro de un rango determinado. Se representa por una curva simétrica en forma de campana, donde la mayor parte de los datos se agrupan alrededor del valor central.
+
+**Forma de Campana:** La distribución es simétrica alrededor de su media, creando una curva con forma de campana. El punto más alto de la campana es la media.
+
+**Media, Mediana y Moda Coincidentes:** En una distribución normal perfecta, estos tres valores son iguales y se encuentran en el centro de la curva.
+
+**Asintótica al Eje Horizontal:** La curva se extiende indefinidamente en ambas direcciones, acercándose al eje *x* pero sin llegar a tocarlo.
+
+**Regla Empírica:** Aproximadamente el 68% de los datos se encuentran dentro de una desviación estándar de la media $(\mu \pm \sigma)$, el 95% dentro de dos desviaciones estándar $(\mu \pm 2\sigma)$, el 99.7% dentro de tres desviaciones estándar $(\mu \pm 3\sigma)$.
+
+**Parámetros**
+
+La distribución normal está completamente definida por dos parámetros:
+
+**Media** $(\mu)$: Indica la ubicación del centro de la curva y el valor más probable.
+
+**Varianza** $\sigma^2$ **o Desviación Estándar** $(\sigma)$: Mide la dispersión o variabilidad de los datos. Una desviación estándar grande genera una curva más ancha y aplanada, mientras que una pequeña produce una curva más estrecha y alta.
+
+**Fórmulas**
+
+La fórmula principal de la distribución normal es la función de densidad de probabilidad (FDP).Esta función no calcula la probabilidad de un punto exacto, sino la densidad de probabilidad en ese punto.
+
+Función de Densidad de Probabilidad (FDP):
+
+$$f(x)=\frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}$$
+
+Donde:
+
+- $x$ es el valor de la variable aleatoria.
+- $\mu$ es la media.
+- $\sigma$ es la desviación estándar.
+- $e$ es el número de Euler (aproximadamente 2.71828).
+- $\pi$ es la constante pi (aproximadamente 3.14159).
+
+Para calcular probabilidades, se utiliza la distribución normal estándar, que tiene una media de 0 y una desviación estándar de 1. Cualquier variable normal puede estandarizarse usando la siguiente fórmula:
+
+Fórmula de Estandarización (puntuación Z):
+
+$$Z=\frac{x-\mu}{\sigma}$$
+
+La puntuación (Z) indica cuántas desviaciones estándar se encuentra un valor respecto a la media. Luego, se utilizan tablas o software estadístico para calcular las probabilidades correspondientes.
+
+**Ejercicio 6.7**
+
+Un investigador científico informa que unos ratones vivirán un promedio de 40 meses cuando sus dietas se restringen drásticamente y después se enriquecen con vitaminas y proteínas. Suponiendo que las vidas de tales ratones se distribuyen normalmente con una desviación estándar de 6.3 meses, encuentre la probabilidad de que un ratón dado vivirá:
+
+a)  Más de 32 meses.
+
+b)  Menos de 28 meses.
+
+c)  Entre 37 y 49 meses.
+
+**Parámetros**
+
+```{r, echo=TRUE}
+media <- 40
+desviacion_estandar <- 6.3
+```
+
+**Solucion Incisos**
+
+:::::: panel-tabset
+## Inciso A
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(X>32)$$
+
+Datos:
+
+$$\mu=40$$
+
+$$\sigma=6.3$$
+
+Estandarizando:
+
+$$Z=\frac{32-40}{6.3}=-1.27$$
+
+Entonces:
+
+$$P(X>32)=P(Z>-1.27)$$
+
+$$P(X>32)=0.8979$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_a <- 1 - pnorm(32, mean = media, sd = desviacion_estandar)
+
+cat("a)", round(prob_a, 4), "\n")
+```
+
+La probabilidad de que un ratón viva más de 32 meses es:
+
+$$89.79\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= 32),
+    aes(x = x, y = y),
+    fill = "steelblue",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 32, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 32, y = 0.01, label = "32 meses"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de vivir más de 32 meses",
+    x = "Vida en meses",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad de que un ratón viva más de 32 meses. Se observa que la mayor parte del área bajo la curva se encuentra a la derecha de 32 meses, lo cual indica una probabilidad alta de supervivencia superior a este valor.
+:::
+
+## Inciso B
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(X<28)$$
+
+Datos:
+
+$$\mu=40$$
+
+$$\sigma=6.3$$
+
+Estandarizando:
+
+$$Z=\frac{28-40}{6.3}=-1.9048$$
+
+Aproximando:
+
+$$Z\approx -1.90$$
+
+Entonces:
+
+$$P(X<28)=P(Z<-1.9048)$$
+
+$$P(X<28)=0.0287$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_b <- pnorm(28, mean = media, sd = desviacion_estandar)
+
+cat("b)", round(prob_b, 4), "\n")
+```
+
+La probabilidad de que un ratón viva menos de 28 meses es:
+
+$$2.84\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x <= 28),
+    aes(x = x, y = y),
+    fill = "lightgreen",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 28, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 28, y = 0.01, label = "28 meses"),
+    hjust = 1.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de vivir menos de 28 meses",
+    x = "Vida en meses",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad de que un ratón viva menos de 28 meses. Se observa que el área sombreada es pequeña respecto al área total bajo la curva, lo que indica que es poco probable que un ratón viva menos de ese tiempo.
+:::
+
+## Inciso C
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(37<X<49)$$
+
+Datos:
+
+$$\mu=40$$
+
+$$\sigma=6.3$$
+
+Estandarizando los dos valores:
+
+$$Z_1=\frac{37-40}{6.3}=-0.48$$
+
+$$Z_2=\frac{49-40}{6.3}=1.43$$
+
+Entonces:
+
+$$P(37<X<49)=P(-0.48<Z<1.43)$$
+
+$$P(37<X<49)=0.6065$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_c <- pnorm(49, mean = media, sd = desviacion_estandar) -
+          pnorm(37, mean = media, sd = desviacion_estandar)
+
+cat("c)", round(prob_c, 4), "\n")
+```
+
+La probabilidad de que un ratón viva entre 37 y 49 meses es:
+
+$$60.65\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= 37 & x <= 49),
+    aes(x = x, y = y),
+    fill = "purple",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 37, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 49, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 37, y = 0.01, label = "37 meses"),
+    hjust = 1.1,
+    vjust = -1
+  ) +
+  geom_text(
+    aes(x = 49, y = 0.01, label = "49 meses"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de vivir entre 37 y 49 meses",
+    x = "Vida en meses",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad de que un ratón viva entre 37 y 49 meses. Se observa que el intervalo contiene una parte importante del área bajo la curva, ya que está alrededor de la media de 40 meses.
+:::
+::::::
+
+**Conclusión**
+
+La distribución normal permitió calcular distintas probabilidades relacionadas con la vida útil de los ratones bajo una dieta especial. Los resultados muestran que es altamente probable que los ratones vivan más de 32 meses, mientras que es poco probable que sobrevivan más de 49 meses o menos de 28 meses. Además, la mayor concentración de probabilidades se encuentra alrededor de la media de 40 meses, lo cual es consistente con el comportamiento esperado en una distribución normal. Porque incluso los ratones terminan organizados alrededor de una media estadística. La naturaleza también parece obsesionada con las curvas de campana.
+
+**Ejercicio 6.9**
+
+Una máquina expendedora de bebidas gaseosas se regula para que sirva un promedio de 200 mililitros por vaso. Si la cantidad de bebida se distribuye normalmente con una desviación estándar igual a 15 mililitros,
+
+a)  ¿qué fracción de los vasos contendrá más de 224 mililitros?
+
+b)  ¿cuál es la probabilidad de que un vaso contenga entre 191 y 209 mililitros?
+
+c)  ¿cuántos vasos probablemente se derramarán si se utilizan vasos de 230 mililitros para las siguientes 1000 bebidas?
+
+**Parametros**
+
+```{r, echo=TRUE}
+
+media <- 200
+desviacion_estandar <- 15
+```
+
+**Solución a los incisos**
+
+:::::: panel-tabset
+## Inciso A
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(X>224)$$
+
+Datos:
+
+$$\mu=200$$
+
+$$\sigma=15$$
+
+Estandarizando:
+
+$$Z=\frac{224-200}{15}=1.60$$
+
+Entonces:
+
+$$P(X>224)=P(Z>1.60)$$
+
+$$P(X>224)=0.0548$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_a <- 1 - pnorm(224, mean = media, sd = desviacion_estandar)
+
+cat("a)", round(prob_a, 4), "\n")
+```
+
+La fracción de vasos que contendrá más de 224 mililitros es:
+
+$$0.0548$$
+
+Esto equivale aproximadamente a:
+
+$$5.48\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= 224),
+    aes(x = x, y = y),
+    fill = "coral",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 224, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 224, y = 0.005, label = "224 ml"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de que un vaso contenga más de 224 ml",
+    x = "Cantidad de bebida (ml)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la fracción de vasos que contienen más de 224 mililitros. Como el área sombreada está en la cola derecha de la distribución, esta probabilidad es pequeña.
+:::
+
+## Inciso B
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(191<X<209)$$
+
+Datos:
+
+$$\mu=200$$
+
+$$\sigma=15$$
+
+Estandarizando los dos valores:
+
+$$Z_1=\frac{191-200}{15}=-0.60$$
+
+$$Z_2=\frac{209-200}{15}=0.60$$
+
+Entonces:
+
+$$P(191<X<209)=P(-0.60<Z<0.60)$$
+
+$$P(191<X<209)=0.4515$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_b <- pnorm(209, mean = media, sd = desviacion_estandar) -
+          pnorm(191, mean = media, sd = desviacion_estandar)
+
+cat("b)", round(prob_b, 4), "\n")
+```
+
+La probabilidad de que un vaso contenga entre 191 y 209 mililitros es:
+
+$$0.4515$$
+
+Esto equivale aproximadamente a:
+
+$$45.15\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= 191 & x <= 209),
+    aes(x = x, y = y),
+    fill = "darkgreen",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 191, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 209, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 191, y = 0.005, label = "191 ml"),
+    hjust = 1.1,
+    vjust = -1
+  ) +
+  geom_text(
+    aes(x = 209, y = 0.005, label = "209 ml"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de que un vaso contenga entre 191 ml y 209 ml",
+    x = "Cantidad de bebida (ml)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad de que un vaso contenga entre 191 y 209 mililitros. Como el intervalo está alrededor de la media de 200 ml, contiene una parte importante del área bajo la curva.
+:::
+
+## Inciso C
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular cuántos vasos probablemente se derramarán si se utilizan vasos de 230 mililitros.
+
+Un vaso se derrama cuando:
+
+$$X>230$$
+
+Primero calculamos:
+
+$$P(X>230)$$
+
+Datos:
+
+$$\mu=200$$
+
+$$\sigma=15$$
+
+Estandarizando:
+
+$$Z=\frac{230-200}{15}=2.00$$
+
+Entonces:
+
+$$P(X>230)=P(Z>2.00)$$
+
+$$P(X>230)=0.0228$$
+
+Como se sirven 1000 bebidas:
+
+$$1000(0.0228)=22.8$$
+
+Aproximando:
+
+$$23 \text{ vasos}$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+total_vasos <- 1000
+
+prob_derramarse <- 1 - pnorm(230, mean = media, sd = desviacion_estandar)
+
+vasos_derramados <- prob_derramarse * total_vasos
+
+cat("c)", round(vasos_derramados), "vasos\n")
+```
+
+Si se utilizan vasos de 230 mililitros para las siguientes 1000 bebidas, probablemente se derramarán:
+
+$$23 \text{ vasos}$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= 230),
+    aes(x = x, y = y),
+    fill = "purple",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 230, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 230, y = 0.005, label = "230 ml"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de que un vaso se derrame",
+    x = "Cantidad de bebida (ml)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad de que un vaso contenga más de 230 mililitros y, por lo tanto, se derrame. Como esta área está en la cola derecha de la distribución, la probabilidad es baja; sin embargo, al considerar 1000 bebidas, se espera que aproximadamente 23 vasos se derramen.
+:::
+::::::
+
+**Ejercicio 6.11**
+
+Un abogado viaja todos los días de su casa en los suburbios a su oficina en el centro de la ciudad. El tiempo promedio para un viaje sólo de ida es de 24 minutos, con una desviación estándar de 3.8 minutos. Suponga que la distribución de los tiempos de viaje está distribuida normalmente.
+
+a)  ¿Cuál es la probabilidad de que un viaje tome al menos 1/2 hora?
+
+b)  Si la oficina abre a las 9:00 A.M. y él sale diariamente de su casa a las 8:45 A.M., ¿qué porcentaje de las veces llegará tarde al trabajo?
+
+c)  Si sale de su casa a las 8:35 A.M. y el café se sirve en la oficina de 8:50 A.M. a 9:00 A.M., ¿cuál es la probabilidad de que se pierda el café?
+
+d)  Encuentre la longitud de tiempo por arriba de la cual encontramos el 15% de los viajes más lentos.
+
+e)  Encuentre la probabilidad de que 2 de los siguientes 3 viajes tomen al menos 1/2 hora.
+
+**Parámetros**
+
+```{r, echo=TRUE}
+media <- 24
+desviacion_estandar <- 3.8
+```
+
+**Solución de los incisos**
+
+:::::::: panel-tabset
+## Inciso A
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(X \geq 30)$$
+
+Datos:
+
+$$\mu=24$$
+
+$$\sigma=3.8$$
+
+Estandarizando:
+
+$$Z=\frac{30-24}{3.8}=1.58$$
+
+Entonces:
+
+$$P(X \geq 30)=P(Z \geq 1.58)$$
+
+$$P(X \geq 30)=0.0571$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_a <- 1 - pnorm(30, mean = media, sd = desviacion_estandar)
+
+cat("a)", round(prob_a, 4), "\n")
+```
+
+La probabilidad de que un viaje tome al menos 30 minutos es:
+
+$$5.72\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= 30),
+    aes(x = x, y = y),
+    fill = "coral",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 30, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 30, y = 0.02, label = "30 min"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de viajes de al menos 30 minutos",
+    x = "Tiempo de viaje (minutos)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa los viajes que duran al menos 30 minutos. Se observa que el área sombreada es pequeña respecto a toda la distribución, indicando que estos viajes son poco frecuentes.
+:::
+
+## Inciso B
+
+::: panel-tabset
+### Desarrollo
+
+El abogado llegará tarde si el viaje dura más de 15 minutos.
+
+Se desea calcular:
+
+$$P(X>15)$$
+
+Datos:
+
+$$\mu=24$$
+
+$$\sigma=3.8$$
+
+Estandarizando:
+
+$$Z=\frac{15-24}{3.8}=-2.37$$
+
+Entonces:
+
+$$P(X>15)=0.9911$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_b <- 1 - pnorm(15, mean = media, sd = desviacion_estandar)
+
+cat("b)", round(prob_b, 4), "\n")
+```
+
+La probabilidad de que el abogado llegue tarde es:
+
+$$99.11\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= 15),
+    aes(x = x, y = y),
+    fill = "#3de3c2",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 15, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 15, y = 0.02, label = "15 min"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de llegar tarde",
+    x = "Tiempo de viaje (minutos)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La gráfica muestra que casi toda el área bajo la curva está a la derecha de 15 minutos. Esto indica que salir a las 8:45 A.M. hace extremadamente probable llegar tarde al trabajo.
+:::
+
+## Inciso C
+
+::: panel-tabset
+### Desarrollo
+
+El abogado se perderá el café si tarda más de 25 minutos en llegar.
+
+Se desea calcular:
+
+$$P(X>25)$$
+
+Datos:
+
+$$\mu=24$$
+
+$$\sigma=3.8$$
+
+Estandarizando:
+
+$$Z=\frac{25-24}{3.8}=0.26$$
+
+Entonces:
+
+$$P(X>25)=0.3974$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_c <- 1 - pnorm(25, mean = media, sd = desviacion_estandar)
+
+cat("c)", round(prob_c, 4), "\n")
+```
+
+La probabilidad de perderse el café es:
+
+$$39.62\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= 25),
+    aes(x = x, y = y),
+    fill = "gray",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 25, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = 25, y = 0.02, label = "25 min"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Probabilidad de perder el café",
+    x = "Tiempo de viaje (minutos)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa los viajes que duran más de 25 minutos. Se observa que existe una probabilidad considerable de perder el café de la oficina.
+:::
+
+## Inciso D
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar el valor de:
+
+$$x$$
+
+tal que:
+
+$$P(X>x)=0.15$$
+
+Entonces:
+
+$$P(X<x)=0.85$$
+
+Buscando el percentil 85:
+
+$$Z=1.036$$
+
+Aplicando la fórmula:
+
+$$x=\mu+z\sigma$$
+
+$$x=24+(1.036)(3.8)$$
+
+$$x=27.94$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+valor_cuantil <- qnorm(
+  0.85,
+  mean = media,
+  sd = desviacion_estandar
+)
+
+cat("d)", round(valor_cuantil, 2), "minutos\n")
+```
+
+El 15% de los viajes más lentos corresponde a tiempos superiores a:
+
+$$27.94 \text{ minutos}$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+valor_cuantil <- qnorm(
+  0.85,
+  mean = media,
+  sd = desviacion_estandar
+)
+
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= valor_cuantil),
+    aes(x = x, y = y),
+    fill = "#11de07",
+    alpha = 0.5
+  ) +
+  geom_vline(
+    xintercept = valor_cuantil,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_text(
+    aes(
+      x = valor_cuantil,
+      y = 0.02,
+      label = paste0(round(valor_cuantil, 2), " min")
+    ),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "15% de los viajes más lentos",
+    x = "Tiempo de viaje (minutos)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el 15% de los viajes más lentos. Se observa que estos corresponden a tiempos superiores a aproximadamente 27.94 minutos.
+:::
+
+## Inciso E
+
+::: panel-tabset
+### Desarrollo
+
+Primero:
+
+$$P(X \geq 30)=0.0571$$
+
+Entonces:
+
+$$p=0.0571$$
+
+Se utiliza una distribución binomial:
+
+$$P(X=2)=\binom{3}{2}(0.0571)^2(1-0.0571)^1$$
+
+$$P(X=2)=0.0092$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+p_exito <- 1 - pnorm(
+  30,
+  mean = media,
+  sd = desviacion_estandar
+)
+
+prob_e <- dbinom(2, size = 3, prob = p_exito)
+
+cat("e)", round(prob_e, 4), "\n")
+```
+
+La probabilidad de que exactamente 2 de los siguientes 3 viajes duren al menos 30 minutos es:
+
+$$0.92\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+p_exito <- 1 - pnorm(
+  30,
+  mean = media,
+  sd = desviacion_estandar
+)
+
+n_viajes <- 3
+
+exitos_deseados <- 0:n_viajes
+
+probabilidades <- dbinom(
+  exitos_deseados,
+  size = n_viajes,
+  prob = p_exito
+)
+
+df_binomial <- data.frame(
+  num_exitos = factor(exitos_deseados),
+  prob = probabilidades
+)
+
+ggplot(df_binomial, aes(x = num_exitos, y = prob)) +
+  geom_col(fill = "skyblue") +
+  geom_text(
+    aes(label = round(prob, 4)),
+    vjust = -0.5
+  ) +
+  labs(
+    title = "Distribución Binomial",
+    subtitle = "Viajes que duran al menos 30 minutos",
+    x = "Número de viajes",
+    y = "Probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La gráfica representa las probabilidades binomiales para 0, 1, 2 y 3 viajes que duran al menos 30 minutos. Se observa que la probabilidad de que exactamente dos viajes duren al menos 30 minutos es bastante pequeña.
+:::
+::::::::
+
+**Ejercicio 6.13**
+
+La vida promedio de cierto tipo de motor pequeño es de 10 años con una desviación estándar de 2 años. El fabricante reemplaza gratis todos los motores que fallen dentro del periodo de garantía. Si está dispuesto a reemplazar sólo el 3% de los motores que fallen, ¿cuánto tiempo de garantía debería ofrecer? Suponga que la duración de un motor sigue una distribución normal.
+
+**Parámetros**
+
+```{r, echo=TRUE}
+media <- 10
+desviacion_estandar <- 2
+probabilidad_fallo <- 0.03
+```
+
+**Solución**
+
+::: panel-tabset
+## Desarrollo
+
+Se desea encontrar el valor de:
+
+$$x$$
+
+tal que:
+
+$$P(X<x)=0.03$$
+
+Buscando el percentil 3:
+
+$$Z=-1.8808$$
+
+Aplicando la fórmula:
+
+$$x=\mu+z\sigma$$
+
+$$x=10+(-1.8808)(2)$$
+
+$$x=6.2384$$
+
+Aproximando:
+
+$$x\approx 6.24$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+tiempo_garantia <- qnorm(
+  0.03,
+  mean = media,
+  sd = desviacion_estandar
+)
+
+cat("Tiempo de garantía:", round(tiempo_garantia, 2), "años\n")
+```
+
+El fabricante debería ofrecer una garantía aproximada de:
+
+$$6.24 \text{ años}$$
+
+## Gráfica
+
+```{r, echo=TRUE}
+tiempo_garantia <- qnorm(
+  0.03,
+  mean = media,
+  sd = desviacion_estandar
+)
+
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(
+    x_vals,
+    mean = media,
+    sd = desviacion_estandar
+  )
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+
+  geom_line(
+    color = "black",
+    linewidth = 1
+  ) +
+
+  geom_area(
+    data = subset(df_normal, x <= tiempo_garantia),
+    aes(x = x, y = y),
+    fill = "purple",
+    alpha = 0.5
+  ) +
+
+  geom_vline(
+    xintercept = tiempo_garantia,
+    linetype = "dashed",
+    color = "red"
+  ) +
+
+  geom_text(
+    aes(
+      x = tiempo_garantia,
+      y = 0.01,
+      label = paste0(round(tiempo_garantia, 2), " años")
+    ),
+    hjust = 1.1,
+    vjust = -1
+  ) +
+
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Período de garantía de los motores",
+    x = "Vida útil del motor (años)",
+    y = "Densidad de probabilidad"
+  ) +
+
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el 3% de los motores que fallan antes del tiempo de garantía. La probabilidad obtenida en R indica que el fabricante debe ofrecer aproximadamente 6.24 años de garantía para reemplazar únicamente el 3% de los motores defectuosos.
+:::
+
+**Ejercicio 6.15**
+
+Una compañía paga a sus empleados un salario promedio de \$15.90 por hora con una desviación estándar de \$1.50. Si los salarios se distribuyen aproximadamentede forma normal y se pagan al centavo más 6.15 Una compañía paga a sus empleados un salario promedio de \$15.90 por hora con una desviación estándar de \$1.50. Si los salarios se distribuyen aproximadamente de forma normal y se pagan al centavo más 6.15 Una compañía paga a sus empleados un salario promedio de \$15.90 por hora con una desviación estándar de \$1.50. Si los salarios se distribuyen aproximadamente de forma normal y se pagan al centavo más cercano,
+
+a)  ¿qué porcentaje de los trabajadores reciben salarios entre \$13.75 y \$16.22 inclusive por hora?
+
+b)  ¿el 5% más alto de los salarios por hora de los empleados es mayor a qué cantidad?
+
+**Parámetros**
+
+```{r, echo=TRUE}
+media <- 15.90
+desviacion_estandar <- 1.50
+
+limite_inferior <- 13.75 - 0.005
+limite_superior <- 16.22 + 0.005
+```
+
+**Solución de los incisos**
+
+::::: panel-tabset
+## Inciso A
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(13.745<X<16.225)$$
+
+Datos:
+
+$$\mu=15.90$$
+
+$$\sigma=1.50$$
+
+Como los salarios se pagan al centavo más cercano, se aplica corrección de continuidad:
+
+$$13.75-0.005=13.745$$
+
+$$16.22+0.005=16.225$$
+
+Estandarizando:
+
+$$Z_1=\frac{13.745-15.90}{1.50}=-1.4367$$
+
+$$Z_2=\frac{16.225-15.90}{1.50}=0.2167$$
+
+Entonces:
+
+$$P(13.745<X<16.225)=0.5104$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_a <- pnorm(limite_superior, mean = media, sd = desviacion_estandar) -
+          pnorm(limite_inferior, mean = media, sd = desviacion_estandar)
+
+porcentaje_a <- prob_a * 100
+
+cat("a)", round(porcentaje_a, 2), "%\n")
+```
+
+El porcentaje de trabajadores con salarios entre \$13.75 y \$16.22 por hora es:
+
+$$51.04\%$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= limite_inferior & x <= limite_superior),
+    aes(x = x, y = y),
+    fill = "darkgreen",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = limite_inferior, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = limite_superior, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = limite_inferior, y = 0.05, label = "$13.745"),
+    hjust = 1.1,
+    vjust = -1
+  ) +
+  geom_text(
+    aes(x = limite_superior, y = 0.05, label = "$16.225"),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "Porcentaje de salarios entre $13.75 y $16.22",
+    x = "Salario por hora ($)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el porcentaje de trabajadores que reciben salarios entre \$13.75 y \$16.22 por hora. Según el resultado obtenido en R, esta probabilidad es de 0.5104, equivalente al 51.04%.
+:::
+
+## Inciso B
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar el valor salarial por encima del cual está el 5% más alto de los empleados.
+
+Esto equivale a buscar el percentil 95:
+
+$$P(X<x)=0.95$$
+
+Buscando el valor correspondiente:
+
+$$Z=1.6449$$
+
+Aplicando la fórmula:
+
+$$x=\mu+z\sigma$$
+
+$$x=15.90+(1.6449)(1.50)$$
+
+$$x=18.3673$$
+
+Aproximando:
+
+$$x=18.37$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+valor_b <- qnorm(
+  0.95,
+  mean = media,
+  sd = desviacion_estandar
+)
+
+cat("b)", round(valor_b, 2), "$\n")
+```
+
+El 5% más alto de los salarios por hora de los empleados es mayor a:
+
+$$18.37$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+valor_b <- qnorm(
+  0.95,
+  mean = media,
+  sd = desviacion_estandar
+)
+
+x_vals <- seq(
+  media - 3 * desviacion_estandar,
+  media + 3 * desviacion_estandar,
+  length.out = 1000
+)
+
+df_normal <- data.frame(
+  x = x_vals,
+  y = dnorm(x_vals, mean = media, sd = desviacion_estandar)
+)
+
+ggplot(df_normal, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_normal, x >= valor_b),
+    aes(x = x, y = y),
+    fill = "purple",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = valor_b, linetype = "dashed", color = "red") +
+  geom_text(
+    aes(x = valor_b, y = 0.05, label = paste0("$", round(valor_b, 2))),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Normal",
+    subtitle = "El 5% de salarios más altos",
+    x = "Salario por hora ($)",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el 5% más alto de los salarios por hora. Según el resultado obtenido en R, este grupo corresponde a salarios mayores a \$18.37.
+:::
+:::::
+
+# Distribución Ji Cuadrado
+
+La distribución ji-cuadrado $\chi^2$ es una distribución de probabilidad continua definida únicamente para valores positivos. Surge de la suma de los cuadrados de variables normales estándar independientes y depende de un parámetro llamado grados de libertad ($k$). Su media es igual a $k$, su varianza es $2k$ y su forma cambia según el número de grados de libertad. Cuando los grados de libertad son pequeños, la distribución es muy asimétrica; a medida que aumentan, la distribución se vuelve más simétrica y se aproxima a una distribución normal.
+
+La distribución ji-cuadrado es fundamental en estadística inferencial, ya que se utiliza en pruebas de hipótesis, intervalos de confianza y en la construcción de otras distribuciones como la $t$ de Student y la $F$ de Fisher. Básicamente, buena parte de la estadística moderna decidió construir su imperio matemático sumando cuadrados y esperando que todo tuviera sentido. Porque aparentemente elevar cosas al cuadrado tranquiliza a los matemáticos.
+
+**Parámetros y características**
+
+A diferencia de la distribución normal, la distribución ji-cuadrado no se define mediante una media y desviación estándar independientes, sino por un único parámetro.
+
+**Grados de libertad (**$v$ o $df$): Este parámetro determina la forma de la distribución. A medida que los grados de libertad aumentan, la forma de la distribución se vuelve más simétrica y se aproxima a una distribución normal.
+
+**Valores no negativos:** La variable ji cuadrado $\chi^2$ solo puede tomar valores positivos, ya que se calcula a partir de la suma de cuadrados. Por lo tanto, su curva comienza en cero y se extiende hacia la derecha.
+
+**Asimétrica a la Derecha:** La distribución es asimétrica con una cola larga hacia la derecha.
+
+**Media y varianza:** La media de la distribución es igual a los grados de libertad $(\mu = v)$ y la varianza es el doble de los grados de libertad $(\sigma^2 = 2v)$.
+
+**Dominio:** 𝑋≥0 (nunca toma valores negativos).
+
+**Función de densidad de probabilidad**
+
+$$f(x;k)=
+\frac{1}
+{2^{k/2}\Gamma\left(\frac{k}{2}\right)}
+x^{\frac{k}{2}-1}
+e^{-x/2},
+\quad x>0$$
+
+donde:
+
+- $k$ representa los grados de libertad.
+- $\Gamma$ es la función gamma.
+
+**Usos principales en estadística**
+
+La $\chi^2$ es fundamental en **estadística inferencial**. Algunos de sus usos:
+
+Pruebas de hipotesis:
+
+1.**Chi-cuadrado de bondad de ajuste:** verificar si los datos observados se ajustan a una distribución teórica.
+
+2.**Chi-cuadrado de independencia:** evaluar si dos variables categóricas son independientes en una tabla de contingencia.
+
+**Intervalos de confianza:** para la varianza poblacional de una normal, ya que está relacionada con la suma de cuadrados de normales.
+
+**Modelos más complejos:** forma parte de la familia de distribuciones asociadas a la F de Fisher y la t de Student, que también dependen de $\chi^2$.
+
+**Familias de Curvas Ji Cuadrado**
+
+```{r}
+k_vals <- c(4, 5, 10)
+x <- seq(0, 40, length.out = 1000)
+df <- data.frame()
+for (k in k_vals) {  df <- rbind(df, data.frame(  x = x,    dens = dchisq(x, df = k),    k = factor(k)  ))}
+ggplot(df, aes(x = x, y = dens, color = k)) +
+  geom_line(size = 1.2) +
+  labs(    title = "Familia de curvas χ²",    subtitle = "Densidades para distintos grados de libertad",    x = "x",
+    y = "Densidad",    color = "Grados de libertad (k)"  ) +
+  theme_minimal(base_size = 14)
+```
+
+**Ejercicio 8.39**
+
+Para una distribución ji-cuadrado encuentre:
+
+a)  $\chi^2_{0.025}$ cuando $v=15$
+
+b)  $\chi^2_{0.01}$ cuando $v=7$
+
+c)  $\chi^2_{0.05}$ cuando $v=24$
+
+**Parámetros**
+
+```{r, echo=TRUE}
+v1 <- 15
+v2 <- 7
+v3 <- 24
+
+alpha1 <- 0.025
+alpha2 <- 0.01
+alpha3 <- 0.05
+```
+
+**Solución**
+
+:::::: panel-tabset
+## Inciso A
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$\chi^2_{0.025}$$
+
+cuando:
+
+$$v=15$$
+
+Como $\alpha=0.025$, se busca el valor crítico que deja el 2.5% en la cola derecha:
+
+$$P(X>\chi^2_{0.025})=0.025$$
+
+Por tanto:
+
+$$P(X<\chi^2_{0.025})=0.975$$
+
+$$\chi^2_{0.025}=27.4884$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+chi_a <- qchisq(alpha1, df = v1, lower.tail = FALSE)
+
+cat("a)", round(chi_a, 5), "\n")
+```
+
+El valor crítico es:
+
+$$\chi^2_{0.025}=27.48839$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  0,
+  chi_a + v1 * 2,
+  length.out = 1000
+)
+
+df_chi <- data.frame(
+  x = x_vals,
+  y = dchisq(x_vals, df = v1)
+)
+
+ggplot(df_chi, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_chi, x >= chi_a),
+    aes(x = x, y = y),
+    fill = "red",
+    alpha = 0.5
+  ) +
+  geom_vline(
+    xintercept = chi_a,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_text(
+    aes(
+      x = chi_a,
+      y = 0.02,
+      label = round(chi_a, 2)
+    ),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Ji-cuadrado",
+    subtitle = "Área en la cola derecha con α = 0.025",
+    x = "Valores de χ²",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el 2.5% del área total ubicado en la cola derecha de la distribución ji-cuadrado. Según el resultado obtenido en R, el valor crítico es $\chi^2_{0.025}=27.48839$.
+:::
+
+## Inciso B
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$\chi^2_{0.01}$$
+
+cuando:
+
+$$v=7$$
+
+Como $\alpha=0.01$, se busca el valor crítico que deja el 1% en la cola derecha:
+
+$$P(X>\chi^2_{0.01})=0.01$$
+
+Por tanto:
+
+$$P(X<\chi^2_{0.01})=0.99$$
+
+$$\chi^2_{0.01}=18.4753$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+chi_b <- qchisq(alpha2, df = v2, lower.tail = FALSE)
+
+cat("b)", round(chi_b, 5), "\n")
+```
+
+El valor crítico es:
+
+$$\chi^2_{0.01}=18.47531$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  0,
+  chi_b + v2 * 2,
+  length.out = 1000
+)
+
+df_chi <- data.frame(
+  x = x_vals,
+  y = dchisq(x_vals, df = v2)
+)
+
+ggplot(df_chi, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_chi, x >= chi_b),
+    aes(x = x, y = y),
+    fill = "red",
+    alpha = 0.5
+  ) +
+  geom_vline(
+    xintercept = chi_b,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_text(
+    aes(
+      x = chi_b,
+      y = 0.03,
+      label = round(chi_b, 2)
+    ),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Ji-cuadrado",
+    subtitle = "Área en la cola derecha con α = 0.01",
+    x = "Valores de χ²",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el 1% del área total ubicado en la cola derecha de la distribución ji-cuadrado. Según el resultado obtenido en R, el valor crítico es $\chi^2_{0.01}=18.47531$.
+:::
+
+## Inciso C
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$\chi^2_{0.05}$$
+
+cuando:
+
+$$v=24$$
+
+Como $\alpha=0.05$, se busca el valor crítico que deja el 5% en la cola derecha:
+
+$$P(X>\chi^2_{0.05})=0.05$$
+
+Por tanto:
+
+$$P(X<\chi^2_{0.05})=0.95$$
+
+$$\chi^2_{0.05}=36.4150$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+chi_c <- qchisq(alpha3, df = v3, lower.tail = FALSE)
+
+cat("c)", round(chi_c, 5), "\n")
+```
+
+El valor crítico es:
+
+$$\chi^2_{0.05}=36.41503$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  0,
+  chi_c + v3 * 2,
+  length.out = 1000
+)
+
+df_chi <- data.frame(
+  x = x_vals,
+  y = dchisq(x_vals, df = v3)
+)
+
+ggplot(df_chi, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_chi, x >= chi_c),
+    aes(x = x, y = y),
+    fill = "red",
+    alpha = 0.5
+  ) +
+  geom_vline(
+    xintercept = chi_c,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_text(
+    aes(
+      x = chi_c,
+      y = 0.02,
+      label = round(chi_c, 2)
+    ),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Ji-cuadrado",
+    subtitle = "Área en la cola derecha con α = 0.05",
+    x = "Valores de χ²",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el 5% del área total ubicado en la cola derecha de la distribución ji-cuadrado. Según el resultado obtenido en R, el valor crítico es $\chi^2_{0.05}=36.41503$.
+:::
+::::::
+
+**Tabla de resultados**
+
+```{r}
+tabla <- data.frame(
+  Inciso = c("a","b","c"),
+  `Grados de libertad` = c(15,7,24),
+  `α` = c(0.025,0.01,0.05),
+  `χ² crítico` = c(
+    chi_a,
+    chi_b,
+    chi_c
+  ),
+  check.names = FALSE
+)
+
+tabla$`χ² crítico` <- as.numeric(tabla$`χ² crítico`)
+tabla$`χ² crítico` <- round(tabla$`χ² crítico`,5)
+
+kbl(
+  tabla,
+  format = "html",
+  align = "c"
+) %>%
+  add_header_above(
+    c("Resultados de valores críticos χ²" = 4),
+    background = "#1F4E79",
+    color = "white",
+    bold = TRUE
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    position = "center"
+  )
+```
+
+**Ejercicio 8.41**
+
+Para una distribución chi cuadrada encuentre $\chi_\alpha^2$ tal que
+
+\begin{aligned}
+\text{a. } & P(X^2 > \chi^2_{\alpha})=0.99 
+&& \text{cuando } v=4 \\[6pt]
+
+\text{b. } & P(X^2 > \chi^2_{\alpha})=0.025 
+&& \text{cuando } v=19 \\[6pt]
+
+\text{c. } & P(37.652 < X^2 < \chi^2_{\alpha})=0.045 
+&& \text{cuando } v=25
+\end{aligned}
+
+**Parámetros**
+
+```{r, echo=TRUE}
+v_a <- 4
+v_b <- 19
+v_c <- 25
+```
+
+**Solución**
+
+:::::: panel-tabset
+## Inciso A
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$P(X^2>\chi^2_{\alpha})=0.99$$
+
+Esto implica:
+
+$$P(X^2<\chi^2_{\alpha})=0.01$$
+
+Por tanto, se busca el percentil 0.01 de una distribución chi-cuadrada con:
+
+$$v=4$$
+
+$$\chi^2_{\alpha}=0.29711$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+chi1 <- qchisq(0.99, df = v_a, lower.tail = FALSE)
+
+cat("a)", chi1, "\n")
+```
+
+El valor crítico es:
+
+$$\chi^2_{\alpha}=0.2971095$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  0,
+  20,
+  length.out = 1000
+)
+
+df_chi <- data.frame(
+  x = x_vals,
+  y = dchisq(x_vals, df = v_a)
+)
+
+ggplot(df_chi, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_chi, x >= chi1),
+    aes(x = x, y = y),
+    fill = "#E45756",
+    alpha = 0.5
+  ) +
+  geom_vline(
+    xintercept = chi1,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_text(
+    aes(x = chi1, y = 0.1, label = round(chi1, 5)),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Ji-cuadrado",
+    subtitle = "Área sombreada para P(X² > χ²α) = 0.99",
+    x = "Valores de χ²",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad de obtener valores mayores que $\chi^2_{\alpha}$. Según el resultado obtenido en R, el valor crítico es $\chi^2_{\alpha}=0.29711$, dejando un área de 0.99 a la derecha.
+:::
+
+## Inciso B
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$P(X^2>\chi^2_{\alpha})=0.025$$
+
+Esto implica:
+
+$$P(X^2<\chi^2_{\alpha})=0.975$$
+
+Con:
+
+$$v=19$$
+
+se obtiene:
+
+$$\chi^2_{\alpha}=32.85233$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+chi2 <- qchisq(0.025, df = v_b, lower.tail = FALSE)
+
+cat("b)", round(chi2, 5), "\n")
+```
+
+El valor crítico es:
+
+$$\chi^2_{\alpha}=32.85233$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  0,
+  50,
+  length.out = 1000
+)
+
+df_chi <- data.frame(
+  x = x_vals,
+  y = dchisq(x_vals, df = v_b)
+)
+
+ggplot(df_chi, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_chi, x >= chi2),
+    aes(x = x, y = y),
+    fill = "#59A14F",
+    alpha = 0.5
+  ) +
+  geom_vline(
+    xintercept = chi2,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_text(
+    aes(x = chi2, y = 0.02, label = round(chi2, 5)),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Ji-cuadrado",
+    subtitle = "Área sombreada del 2.5% en la cola derecha",
+    x = "Valores de χ²",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el 2.5% del área total ubicado en la cola derecha de la distribución. Según el resultado obtenido en R, el valor crítico es $\chi^2_{\alpha}=32.85233$.
+:::
+
+## Inciso C
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$\chi^2_{\alpha}$$
+
+tal que:
+
+$$P(37.652<X^2<\chi^2_{\alpha})=0.045$$
+
+Con:
+
+$$v=25$$
+
+Primero se calcula la probabilidad acumulada hasta 37.652:
+
+$$P(X^2<37.652)$$
+
+Luego se suma el área solicitada:
+
+$$P(X^2<\chi^2_{\alpha})=P(X^2<37.652)+0.045$$
+
+El valor encontrado es:
+
+$$\chi^2_{\alpha}=46.92392$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_inicial <- pchisq(37.652, df = v_c)
+
+prob_final <- prob_inicial + 0.045
+
+chi3 <- qchisq(prob_final, df = v_c)
+
+cat("c)", round(chi3, 5), "\n")
+```
+
+El valor crítico es:
+
+$$\chi^2_{\alpha}=46.92392$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(
+  0,
+  70,
+  length.out = 1000
+)
+
+df_chi <- data.frame(
+  x = x_vals,
+  y = dchisq(x_vals, df = v_c)
+)
+
+ggplot(df_chi, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_chi, x >= 37.652 & x <= chi3),
+    aes(x = x, y = y),
+    fill = "#F28E2B",
+    alpha = 0.5
+  ) +
+  geom_vline(
+    xintercept = 37.652,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_vline(
+    xintercept = chi3,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  geom_text(
+    aes(x = 37.652, y = 0.015, label = "37.652"),
+    hjust = 1.1,
+    vjust = -1
+  ) +
+  geom_text(
+    aes(x = chi3, y = 0.015, label = round(chi3, 5)),
+    hjust = -0.1,
+    vjust = -1
+  ) +
+  labs(
+    title = "Distribución Ji-cuadrado",
+    subtitle = "Área sombreada entre 37.652 y χ²α",
+    x = "Valores de χ²",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el área de 0.045 entre 37.652 y el valor crítico buscado. Según el resultado obtenido en R, el valor crítico es $\chi^2_{\alpha}=46.92392$.
+:::
+::::::
+
+# .Distribución T de Student
+
+La distribución t de Student es una distribución de probabilidad continua que surge al estimar la media de una población normalmente distribuida cuando el tamaño de la muestra es pequeño y la varianza poblacional es desconocida. Fue introducida en 1908 por William Sealy Gosset bajo el seudónimo de *Student*.
+
+Matemáticamente, si Z es una variable aleatoria con distribución normal estándar N(0,1) y V es una variable con distribución ji-cuadrado con (v) grados de libertad, independientes entre sí, entonces la variable
+
+$$T=\frac{Z}{\sqrt{V/v}}$$
+
+sigue una distribución t de Student con v grados de libertad.
+
+**Principales características**
+
+- **Forma:** Es simétrica respecto al cero, similar a la normal estándar, pero con colas más pesadas, lo que implica (mayor probabilidad en los extremos).
+
+- **Parámetro:** Depende de los grados de libertad (vv); a mayor vv, la distribución se aproxima a la normal estándar N(0,1).
+
+- **Media:**
+
+$$\mu = 0 \qquad \text{para } v>1$$
+
+- **Varianza:**
+
+$$\sigma^2 = \frac{v}{v-2}
+\qquad \text{para } v>2$$
+
+**Usos principales**
+
+- Pruebas de hipótesis sobre medias (Prueba t de Student)
+
+- Construcción de intervalos de confianza para medias
+
+- Modelar incertidumbre en muestras pequeñas
+
+**Familia de Curvas para T de Student**
+
+```{r, echo=TRUE}
+
+x <- seq(-5,5,length=1000)
+
+df1 <- data.frame(
+  x = x,
+  y = dt(x, df = 1),
+  gl = "v = 1"
+)
+
+df2 <- data.frame(
+  x = x,
+  y = dt(x, df = 5),
+  gl = "v = 5"
+)
+
+df3 <- data.frame(
+  x = x,
+  y = dt(x, df = 30),
+  gl = "v = 30"
+)
+
+df4 <- data.frame(
+  x = x,
+  y = dnorm(x),
+  gl = "Normal N(0,1)"
+)
+
+datos <- rbind(df1,df2,df3,df4)
+
+ggplot(datos,aes(x,y,color=gl))+
+
+geom_line(linewidth=1.2)+
+
+labs(
+  title="Familia de Curvas t de Student",
+  subtitle="Comparación con la distribución normal estándar",
+  x="Valores de t",
+  y="Densidad",
+  color="Distribución"
+)+
+
+theme_minimal(base_size = 14)
+```
+
+**Ejercicio 1**
+
+**8.47**
+
+Encuentre las siguientes probabilidades para una distribución (t) de Student.
+
+a)  Encuentre $P(T<2.365)$ cuando $v=7$.
+
+b)  Encuentre $P(T>1.318)$ cuando $v=24$.
+
+c)  Encuentre $P(-1.356<T<2.179)$ cuando $v=12$.
+
+d)  Encuentre $P(T>-2.567)$ cuando $v=17$.
+
+**Solución**
+
+::::::: panel-tabset
+## Inciso A
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(T<2.365)$$
+
+cuando:
+
+$$v=7$$
+
+El valor se obtiene directamente con la función acumulada de la distribución $t$:
+
+$$P(T<2.365)=0.97501381$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_a <- pt(2.365, df = 7)
+
+cat("a)", prob_a, "\n")
+```
+
+La probabilidad es:
+
+$$0.97501381$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(-4, 4, length.out = 1000)
+
+df_t <- data.frame(
+  x = x_vals,
+  y = dt(x_vals, df = 7)
+)
+
+ggplot(df_t, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_t, x <= 2.365),
+    aes(x = x, y = y),
+    fill = "#59A14F",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 2.365, color = "red", linetype = "dashed") +
+  labs(
+    title = "Distribución t de Student",
+    subtitle = "P(T < 2.365), con v = 7",
+    x = "Valores de t",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad $P(T<2.365)$. Según el resultado obtenido en R, esta probabilidad es 0.97501381.
+:::
+
+## Inciso B
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(T>1.318)$$
+
+cuando:
+
+$$v=24$$
+
+Entonces:
+
+$$P(T>1.318)=0.09997295$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_b <- 1 - pt(1.318, df = 24)
+
+cat("b)", prob_b, "\n")
+```
+
+La probabilidad es:
+
+$$0.09997295$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(-4, 4, length.out = 1000)
+
+df_t <- data.frame(
+  x = x_vals,
+  y = dt(x_vals, df = 24)
+)
+
+ggplot(df_t, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_t, x >= 1.318),
+    aes(x = x, y = y),
+    fill = "#E45756",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = 1.318, color = "red", linetype = "dashed") +
+  labs(
+    title = "Distribución t de Student",
+    subtitle = "P(T > 1.318), con v = 24",
+    x = "Valores de t",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad $P(T>1.318)$. Según el resultado obtenido en R, esta probabilidad es 0.09997295.
+:::
+
+## Inciso C
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(-1.356<T<2.179)$$
+
+cuando:
+
+$$v=12$$
+
+Entonces:
+
+$$P(-1.356<T<2.179)=0.87497477$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_c <- pt(2.179, df = 12) - pt(-1.356, df = 12)
+
+cat("c)", prob_c, "\n")
+```
+
+La probabilidad es:
+
+$$0.87497477$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(-5, 5, length.out = 1000)
+
+df_t <- data.frame(
+  x = x_vals,
+  y = dt(x_vals, df = 12)
+)
+
+ggplot(df_t, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_t, x >= -1.356 & x <= 2.179),
+    aes(x = x, y = y),
+    fill = "#F28E2B",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = -1.356, color = "red", linetype = "dashed") +
+  geom_vline(xintercept = 2.179, color = "red", linetype = "dashed") +
+  labs(
+    title = "Distribución t de Student",
+    subtitle = "P(-1.356 < T < 2.179), con v = 12",
+    x = "Valores de t",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad $P(-1.356<T<2.179)$. Según el resultado obtenido en R, esta probabilidad es 0.87497477.
+:::
+
+## Inciso D
+
+::: panel-tabset
+### Desarrollo
+
+Se desea calcular:
+
+$$P(T>-2.567)$$
+
+cuando:
+
+$$v=17$$
+
+Entonces:
+
+$$P(T>-2.567)=0.99000136$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+prob_d <- 1 - pt(-2.567, df = 17)
+
+cat("d)", prob_d, "\n")
+```
+
+La probabilidad es:
+
+$$0.99000136$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(-5, 5, length.out = 1000)
+
+df_t <- data.frame(
+  x = x_vals,
+  y = dt(x_vals, df = 17)
+)
+
+ggplot(df_t, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_t, x >= -2.567),
+    aes(x = x, y = y),
+    fill = "#B279A2",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = -2.567, color = "red", linetype = "dashed") +
+  labs(
+    title = "Distribución t de Student",
+    subtitle = "P(T > -2.567), con v = 17",
+    x = "Valores de t",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa la probabilidad $P(T>-2.567)$. Según el resultado obtenido en R, esta probabilidad es 0.99000136.
+:::
+:::::::
+
+**Ejercicio 8.49**
+
+Dada una muestra aleatoria de tamaño $24$ de una distribución normal, encuentre $k$ tal que:
+
+$a. P(-2.069 < T < k)=0.965$
+
+$b. P(k < T < 2.807)=0.095$
+
+$c. P(-k < T < k)=0.90$
+
+**Parámetros**
+
+```{r, echo=TRUE}
+v <- 24 - 1
+```
+
+**Solución**
+
+:::::: panel-tabset
+## Inciso A
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$P(-2.069<T<k)=0.965$$
+
+Con:
+
+$$v=23$$
+
+Primero se calcula:
+
+$$P(T<-2.069)$$
+
+Luego:
+
+$$P(T<k)=P(T<-2.069)+0.965$$
+
+$$P(T<k)=0.9899826$$
+
+Por tanto:
+
+$$k=2.499077$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+p_left <- pt(-2.069, df = v)
+
+target <- p_left + 0.965
+
+k_a <- qt(target, df = v)
+
+cat("a)", k_a, "\n")
+```
+
+El valor encontrado es:
+
+$$k=2.499077$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(-5, 5, length.out = 1000)
+
+df_t <- data.frame(
+  x = x_vals,
+  y = dt(x_vals, df = v)
+)
+
+ggplot(df_t, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_t, x >= -2.069 & x <= k_a),
+    aes(x = x, y = y),
+    fill = "#59A14F",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = -2.069, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = k_a, linetype = "dashed", color = "red") +
+  labs(
+    title = "Distribución t de Student",
+    subtitle = "a) P(-2.069 < T < k) = 0.965",
+    x = "Valores de t",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el área entre $-2.069$ y $k$. Según el resultado obtenido en R, el valor que permite que esta probabilidad sea $0.965$ es $k=2.499077$.
+:::
+
+## Inciso B
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$P(k<T<2.807)=0.095$$
+
+Primero se calcula:
+
+$$P(T<2.807)$$
+
+Luego:
+
+$$P(T<k)=P(T<2.807)-0.095$$
+
+$$P(T<k)=0.8999961$$
+
+Por tanto:
+
+$$k=1.319437$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+p_2807 <- pt(2.807, df = v)
+
+p_k <- p_2807 - 0.095
+
+k_b <- qt(p_k, df = v)
+
+cat("b)", k_b, "\n")
+```
+
+El valor encontrado es:
+
+$$k=1.319437$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(-5, 5, length.out = 1000)
+
+df_t <- data.frame(
+  x = x_vals,
+  y = dt(x_vals, df = v)
+)
+
+ggplot(df_t, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_t, x >= k_b & x <= 2.807),
+    aes(x = x, y = y),
+    fill = "#F28E2B",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = k_b, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 2.807, linetype = "dashed", color = "red") +
+  labs(
+    title = "Distribución t de Student",
+    subtitle = "b) P(k < T < 2.807) = 0.095",
+    x = "Valores de t",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el área entre $k$ y $2.807$. Según el resultado obtenido en R, el valor que permite que esta probabilidad sea $0.095$ es $k=1.319437$.
+:::
+
+## Inciso C
+
+::: panel-tabset
+### Desarrollo
+
+Se desea encontrar:
+
+$$P(-k<T<k)=0.90$$
+
+Por simetría de la distribución $t$:
+
+$$P(T<k)=0.95$$
+
+Por tanto:
+
+$$k=1.713872$$
+
+**Código en R**
+
+```{r, echo=TRUE}
+k_c <- qt(0.95, df = v)
+
+cat("c)", k_c, "\n")
+```
+
+El valor encontrado es:
+
+$$k=1.713872$$
+
+### Gráfica
+
+```{r, echo=TRUE}
+x_vals <- seq(-5, 5, length.out = 1000)
+
+df_t <- data.frame(
+  x = x_vals,
+  y = dt(x_vals, df = v)
+)
+
+ggplot(df_t, aes(x = x, y = y)) +
+  geom_line(color = "black", linewidth = 1) +
+  geom_area(
+    data = subset(df_t, x >= -k_c & x <= k_c),
+    aes(x = x, y = y),
+    fill = "#E15759",
+    alpha = 0.5
+  ) +
+  geom_vline(xintercept = -k_c, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = k_c, linetype = "dashed", color = "red") +
+  labs(
+    title = "Distribución t de Student",
+    subtitle = "c) P(-k < T < k) = 0.90",
+    x = "Valores de t",
+    y = "Densidad de probabilidad"
+  ) +
+  theme_bw()
+```
+
+**Interpretación gráfica**
+
+La región sombreada representa el área central del $90\%$ de la distribución. Según el resultado obtenido en R, el valor que cumple esta condición es $k=1.713872$.
+:::
+::::::
+
+# Distribución F de Fisher
+
+La distribución $F$, también conocida como distribución F de Fisher-Snedecor, es una distribución de probabilidad continua que surge a partir de la razón entre dos variables aleatorias ji-cuadrado independientes normalizadas por sus grados de libertad.
+
+**Definición formal**
+
+Si:
+
+- $X \sim \chi^2_{v_1}$, (una variable ji-cuadrado con $v_1$ grados de libertad).
+
+- $Y \sim \chi^2_{v_2}$, (otra variable ji-cuadrado con $v_2$ grados de libertad).
+
+- $X$ y $Y$ son independientes.
+
+Entonces la variable:
+
+$$F=\frac{(X/v_1)}{(Y/v_2)}$$
+
+sigue una distribución $F$ con grados de libertad $(v_1,v_2)$.
+
+**Propiedades principales**
+
+1.**Soporte:** $F>0$ , Es decir solo toma valores positivos.
+
+2.**Asimetrica:**la curva de densidad es sesgada a la derecha, especialmente para pocos grados de libertad. 3.**Esperanza matemática:**
+
+$$E(F)=\frac{v_2}{v_2-2},
+\qquad \text{para } v_2>2$$
+
+4.**Varianza:**
+
+$$Var(F)=
+\frac{
+2v_2^2(v_1+v_2-2)
+}{
+v_1(v_2-2)^2(v_2-4)
+},
+\qquad \text{para } v_2>4$$
+
+5.Cuando los grados de libertad son grandes, la distribución F tiende a concentrarse cerca de 1.
+
+**Usos más comunes**
+
+1.**Análisis de Varianza (ANOVA):**se utiliza para contrastar si varias medias poblacionales son iguales.
+
+2.**Pruebas sobre varianzas:**por ejemplo, para comparar si dos poblaciones tienen varianzas iguales.
+
+3.**Regresión lineal:**la prueba F sirve para evaluar la significancia global del modelo.
+
+**Familia de Curvas F de Fisher**
+
+```{r}
+x <- seq(0, 5, length.out = 500)
+df_combinations <- list(
+  c(1, 5),
+  c(2, 10),
+  c(5, 10),
+  c(10, 20)
+)
+df <- data.frame()
+for (df_pair in df_combinations) {
+  v1 <- df_pair[1]
+  v2 <- df_pair[2]
+  dens <- df(x, df1 = v1, df2 = v2) # función de densidad de la distribución F
+  df <- rbind(df, data.frame(x = x, y = dens,
+                             label = paste0("v1=", v1, ", v2=", v2)))
+}
+ggplot(df, aes(x = x, y = y, color = label)) +
+  geom_line(size = 1) +
+  labs(title = "Familia de curvas de la distribución F",       x = "x",       y = "Densidad",
+       color = "Grados de libertad") +
+  theme_minimal(base_size = 14)
+```
+
+**Ejercicio 8.53**
+
+Para una distribución $F$ encuentre:
+
+a)  $f_{0.05}$ con $v_1=7$ y $v_2=15$
+
+b)  $f_{0.05}$ con $v_1=15$ y $v_2=7$
+
+c)  $f_{0.01}$ con $v_1=24$ y $v_2=19$
+
+d)  $f_{0.95}$ con $v_1=19$ y $v_2=24$
+
+e)  $f_{0.99}$ con $v_1=28$ y $v_2=12$
+
+```{r, echo=TRUE}
+v1_a <- 7
+v2_a <- 15
+
+v1_b <- 15
+v2_b <- 7
+
+v1_c <- 24
+v2_c <- 19
+
+v1_d <- 19
+v2_d <- 24
+
+v1_e <- 28
+v2_e <- 12
+```
+
+**Solución**
+
+::: panel-tabset
+## Desarrollo
+
+Se calculan los valores críticos solicitados usando la función *qf()* de R.
+
+**Código en R**
+
+```{r, echo=TRUE}
+f_a <- qf(0.05, df1 = v1_a, df2 = v2_a)
+f_b <- qf(0.05, df1 = v1_b, df2 = v2_b)
+f_c <- qf(0.01, df1 = v1_c, df2 = v2_c)
+f_d <- qf(0.95, df1 = v1_d, df2 = v2_d)
+f_e <- qf(0.99, df1 = v1_e, df2 = v2_e)
+
+cat("a)", f_a, "\n")
+cat("b)", f_b, "\n")
+cat("c)", f_c, "\n")
+cat("d)", f_d, "\n")
+cat("e)", f_e, "\n")
+```
+
+Los valores encontrados son:
+
+$$f_{0.05}=0.2848402 \quad \text{con } v_1=7,\ v_2=15$$
+
+$$f_{0.05}=0.3694636 \quad \text{con } v_1=15,\ v_2=7$$
+
+$$f_{0.01}=0.3620048 \quad \text{con } v_1=24,\ v_2=19$$
+
+$$f_{0.95}=2.0398575 \quad \text{con } v_1=19,\ v_2=24$$
+
+$$f_{0.99}=3.7237467 \quad \text{con } v_1=28,\ v_2=12$$
+
+## Gráfica
+
+```{r, echo=TRUE}
+x <- seq(0, 5, length.out = 500)
+
+df_combinations <- list(
+  c(1, 5),
+  c(2, 10),
+  c(5, 10),
+  c(10, 20)
+)
+
+df_plot <- data.frame()
+
+for (df_pair in df_combinations) {
+  v1 <- df_pair[1]
+  v2 <- df_pair[2]
+  
+  dens <- df(x, df1 = v1, df2 = v2)
+  
+  df_plot <- rbind(
+    df_plot,
+    data.frame(
+      x = x,
+      y = dens,
+      label = paste0("v1=", v1, ", v2=", v2)
+    )
+  )
+}
+
+ggplot(df_plot, aes(x = x, y = y, color = label)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "Familia de curvas de la distribución F",
+    x = "x",
+    y = "Densidad",
+    color = "Grados de libertad"
+  ) +
+  theme_minimal(base_size = 14)
+```
+
+**Interpretación gráfica**
+
+La gráfica muestra una familia de curvas de la distribución F para diferentes combinaciones de grados de libertad. Se observa que la forma de la distribución cambia según los valores de $v_1$ y $v_2$. Además, los valores críticos obtenidos en R permiten identificar puntos específicos de probabilidad acumulada dentro de esta distribución.
+:::
+
+# Teorema del Límite Central
+
+El **Teorema del Límite Central (TLC)** es uno de los conceptos más importantes en estadística. Establece que la distribución de las medias muestrales tiende a aproximarse a una distribución normal a medida que el tamaño de la muestra aumenta, sin importar la forma original de la población.
+
+**Concepto y analogía**
+
+Imagina que tienes una población con una distribución extraña, por ejemplo, muy sesgada. Si tomas una sola muestra grande de esa población y calculas su media, esa media se comportará de manera predecible. Si repites este proceso muchas veces, las medias de todas esas muestras formarán un histograma que se parecerá cada vez más a una curva de campana (la distribución normal).
+
+Una analogía popular es la de los dados. La distribución de probabilidad de un solo dado es uniforme (cada número tiene la misma probabilidad). Sin embargo, si lanzas muchos dados y sumas sus resultados, la distribución de esas sumas se aproximará a una campana, con los resultados centrales (la media) siendo mucho más probables que los extremos.
+
+**Puntos clave del Teorema**
+
+1.**Forma de la distribución de muestreo**:La distribución de las medias de la muestra se vuelve normal, sin importar si la población original era normal, sesgada, uniforme o de cualquier otra forma. 2.**Tamaño de la muestra**:La aproximación a la normalidad es más precisa a medida que el tamaño de la muestra (n) aumenta. Generalmente, una muestra de $n \geq 30$ es considerada suficiente para que la aproximación sea válida.
+
+3.**Relación con la media poblacional**:La media de la distribución de muestreo de las medias $(μ_{\bar{x}})$ es igual a la media de la población $(μ)$.
+
+$$\mu_{\bar{x}} = \mu$$ 4.**Relación con el error estándar**: La desviación estándar de la distribución de muestreo de las medias, llamada error estándar $(\sigma_{\bar{x}})$, es igual a la desviación estándar de la población $(σ)$ dividida por la raíz cuadrada del tamaño de la muestra $(n)$.
+
+$$\sigma_{\bar{x}} = \frac{\sigma}{\sqrt{n}}$$
+
+Esto significa que, a medida que el tamaño de la muestra aumenta, el error estándar disminuye, y las medias de las muestras se agrupan más estrechamente alrededor de la media de la población.
+
+**Importancia**
+
+El Teorema del Límite Central es fundamental porque permite utilizar la distribución normal (que es fácil de trabajar) para hacer inferencias sobre la media de la población, incluso cuando no se conoce la distribución de la población original. Esto es la base para muchas pruebas estadísticas, como los intervalos de confianza y las pruebas de hipótesis.
+
+**Simulación para la distribución binomial**
+
+**Distribución binomial original**
+
+```{r}
+library(ggplot2)
+
+set.seed(123)
+
+binomial <- rbinom(
+  10000,
+  size = 10,
+  prob = 0.5
+)
+
+df_binomial <- data.frame(
+  valores = binomial
+)
+
+ggplot(df_binomial,aes(valores))+
+
+geom_histogram(
+  bins = 11,
+  fill = "#91cc02",
+  color = "white"
+)+
+
+labs(
+  title = "Distribución Binomial Original",
+  subtitle = "n = 10, p = 0.5",
+  x = "Valores",
+  y = "Frecuencia"
+)+
+
+theme_minimal(base_size = 14)
+```
+
+**Distribución de las medias muestrales**
+
+```{r}
+set.seed(123)
+k <- 10      # Número de ensayos de la binomial
+p <- 0.35    # Probabilidad de éxito
+n <- 30      # Tamaño de la muestra
+R <- 10000   # Número de repeticiones
+medias_muestrales <- replicate(R, {
+  muestra <- rbinom(n, size = k, prob = p)
+  mean(muestra)
+})
+df_medias <- data.frame(media = medias_muestrales)
+ggplot(df_medias, aes(x = media)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "#91cc02", color = "white", alpha = 0.8) +
+  stat_function(fun = dnorm, args = list(mean = mean(df_medias$media), sd = sd(df_medias$media)), color = "darkblue", size = 1.5, linetype = "dashed") +
+  labs(  title = "Distribución de las Medias Muestrales",  x = "Media de la Muestra",  y = "Densidad") +
+  theme_minimal()
+```
+
+**Interpretación gráfica**
+
+La distribución original binomial presenta discreción y cierta variabilidad. Sin embargo, las medias muestrales generan una forma mucho más cercana a la distribución normal.
+
+**Simulación para la distribución de Poisson**
+
+**Distribución de Poisson original**
+
+```{r}
+set.seed(123)
+lambda <- 3.5
+original_dist <- data.frame(  x = 0:15,  probability = dpois(0:15, lambda = lambda))
+ggplot(original_dist, aes(x = x, y = probability)) +
+  geom_bar(stat = "identity", fill = "#fd1ebc", width = 0.5) +
+  labs(   title = "Distribucion de Poisson origianal", x = "Number of Events",  y = "Probability") +
+  theme_minimal()
+```
+
+**Distribución de las medias muestrales**
+
+```{r}
+n <- 30 
+R <- 10000 
+sample_means <- replicate(R, {
+  sample_data <- rpois(n, lambda = lambda)
+  mean(sample_data)
+})
+df_sample_means <- data.frame(mean = sample_means)
+ggplot(df_sample_means, aes(x = mean)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "#fd1ebc", color = "white", alpha = 0.8) +
+  stat_function(fun = dnorm, args = list(mean = mean(df_sample_means$mean), sd = sd(df_sample_means$mean)), color = "darkblue", size = 1.2, linetype = "dashed") +
+  labs(  title = "Distribución de las Medias Muestrales",  x = "Sample Mean", y = "Density" ) +
+  theme_minimal()
+```
+
+**Interpretación gráfica**
+
+Aunque la distribución de Poisson original es asimétrica, las medias muestrales muestran una forma mucho más cercana a una campana normal.
+
+**Simulación para la distribución hipergeométrica**
+
+**Distribución hipergeométrica original**
+
+```{r}
+N <- 1000  # Tamaño de la población
+K <- 350   # Número de éxitos en la población
+n <- 30    # Tamaño de la muestra
+original_dist <- data.frame( exitos = 0:n, probabilidad = dhyper(x = 0:n, m = K, n = N - K, k = n)
+)
+ggplot(original_dist, aes(x = exitos, y = probabilidad)) +
+  geom_bar(stat = "identity", fill = "#8d8dad", width = 0.5) +
+  labs(    title = "Distribución Hipergeométrica Original",   x = "Número de Éxitos en la Muestra",    y = "Probabilidad"  ) +
+  theme_minimal()
+```
+
+**Distribución de las medias muestrales**
+
+```{r}
+set.seed(123)
+n <- 30      # Tamaño de la muestra
+R <- 10000   # Número de repeticiones
+medias_muestrales <- replicate(R, {
+  exitos_muestra <- rhyper(nn = 1, m = K, n = N - K, k = n)
+  exitos_muestra / n
+})
+df_medias <- data.frame(media = medias_muestrales)
+ggplot(df_medias, aes(x = media)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "#8d8dad", color = "white", alpha = 0.8) +
+  stat_function(fun = dnorm, args = list(mean = mean(df_medias$media), sd = sd(df_medias$media)), color = "darkblue", size = 1.2, linetype = "dashed") +
+  labs(  title = "Distribución de las Medias Muestrales",   x = "Media de la Muestra",  y = "Densidad"  ) +
+  theme_minimal()
+```
+
+**Interpretación gráfica**
+
+La distribución hipergeométrica original presenta discreción y asimetría. Sin embargo, las medias muestrales producen una forma aproximadamente normal, confirmando el comportamiento establecido por el Teorema del Límite Central.
+
+**Conclusión**
+
+El Teorema del Límite Central demuestra que, independientemente de la distribución original de los datos, las medias muestrales tienden a distribuirse normalmente cuando el tamaño de la muestra es suficientemente grande. Esto permite aplicar métodos basados en la distribución normal en una enorme cantidad de problemas estadísticos.
+
+# Aplicación Interactiva de Distribuciones Continuas
+
+Aquí se presenta una aplicación interactiva desarrollada con Shiny que permite explorar distintas distribuciones continuas y visualizar probabilidades de manera dinámica.
+
+```{r echo=FALSE}
+fluidRow(
+  
+  # =====================================
+  # PANEL IZQUIERDO
+  # =====================================
+  
+  column(
+    width = 3,
+    
+    wellPanel(
+      
+      h4("Configuración"),
+      
+      
+      # DISTRIBUCIONES
+      
+      selectInput(
+        "distribucion",
+        "Distribución",
+        
+        choices = c(
+          "Normal",
+          "T Student",
+          "Chi Cuadrado",
+          "F Fisher",
+          "TLC"
+        )
+      ),
+      
+      
+      # PARÁMETROS
+      
+      uiOutput("parametros"),
+      
+      
+      # TIPO DE PROBABILIDAD
+      
+      radioButtons(
+        "tipo_prob",
+        "Tipo de probabilidad",
+        
+        choices = c(
+          "P(X ≤ a)" = "menor",
+          "P(X ≥ a)" = "mayor",
+          "P(a ≤ X ≤ b)" = "entre"
+        ),
+        
+        selected = "menor"
+      ),
+      
+      
+      # LÍMITES
+      
+      uiOutput("limites"),
+      
+      
+      # TÍTULO
+      
+      textInput(
+        "titulo_grafica",
+        "Título de la gráfica",
+        value = "Distribución"
+      )
+      
+    )
+    
+  ),
+  
+  
+  # =====================================
+  # PANEL DERECHO
+  # =====================================
+  
+column(
+  width = 9,
+  
+  uiOutput("formula"),
+  
+  plotly::plotlyOutput(
+    "grafica",
+    height = "650px"
+  ),
+  
+  br(),
+  
+  htmlOutput("resultado_prob"),
+  br(),
+
+downloadButton(
+  "descargar_reporte",
+  "Descargar PNG"
+)
+
+)
+
+)
+
+
+```
+
+```{r context="server", echo=FALSE}
+output$parametros <- renderUI({
+  
+  if(input$distribucion == "Normal"){
+    
+    tagList(
+      
+      numericInput(
+        "media",
+        "Media",
+        value = 0
+      ),
+      
+      numericInput(
+        "desviacion",
+        "Desviación estándar",
+        value = 1,
+        min = 0.1
+      )
+      
+    )
+    
+  }
+  
+  else if(input$distribucion == "T Student"){
+    
+    numericInput(
+      "gl",
+      "Grados de libertad",
+      value = 10,
+      min = 1
+    )
+    
+  }
+  
+  
+else if(input$distribucion == "Chi Cuadrado"){
+  
+  numericInput(
+    "gl_chi",
+    "Grados de libertad",
+    value = 5,
+    min = 1
+  )
+  
+}
+
+  
+  
+else if(input$distribucion == "F Fisher"){
+  
+  tagList(
+    
+    numericInput(
+      "gl1",
+      "Grados de libertad numerador",
+      value = 5,
+      min = 1
+    ),
+    
+    numericInput(
+      "gl2",
+      "Grados de libertad denominador",
+      value = 10,
+      min = 1
+    )
+    
+  )
+  
+}
+
+  
+  
+
+else if(input$distribucion == "TLC"){
+  
+  tagList(
+    
+    numericInput(
+      "n",
+      "Tamaño de muestra",
+      value = 30,
+      min = 1
+    ),
+    
+    numericInput(
+      "simulaciones",
+      "Número de simulaciones",
+      value = 1000,
+      min = 100
+    ),
+    
+    numericInput(
+      "k_binomial",
+      "Número de ensayos binomial (k)",
+      value = 10,
+      min = 1
+    ),
+    
+    numericInput(
+      "p_binomial",
+      "Probabilidad de éxito (p)",
+      value = 0.35,
+      min = 0,
+      max = 1,
+      step = 0.01
+    )
+    
+  )
+  
+}
+  
+})
+
+```
+
+```{r context="server", echo=FALSE}
+output$limites <- renderUI({
+  
+  if(input$tipo_prob == "menor"){
+    
+    numericInput(
+      "limite",
+      "Valor de a",
+      value = 0
+    )
+    
+  }
+  
+  else if(input$tipo_prob == "mayor"){
+    
+    numericInput(
+      "limite",
+      "Valor de a",
+      value = 0
+    )
+    
+  }
+  
+  else if(input$tipo_prob == "entre"){
+    
+    tagList(
+      
+      numericInput(
+        "limite_inferior",
+        "Valor de a",
+        value = -1
+      ),
+      
+      numericInput(
+        "limite_superior",
+        "Valor de b",
+        value = 1
+      )
+      
+    )
+    
+  }
+  
+})
+```
+
+```{r context="server", echo=FALSE}
+
+output$formula <- renderUI({
+  
+  formula <- ""
+  
+  if(input$distribucion == "Normal"){
+  
+  formula <- paste0(
+    
+    "$$Z=\\frac{X-\\mu}{\\sigma}$$",
+    
+    
+    "$$f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}$$"
+    
+  )
+  
+}
+  
+  else if(input$distribucion == "T Student"){
+    
+    formula <- "$$T=\\frac{Z}{\\sqrt{V/v}}$$"
+    
+  }
+  
+  else if(input$distribucion == "Chi Cuadrado"){
+    
+    formula <- "$$f(x)=\\frac{1}{2^{k/2}\\Gamma(k/2)}x^{k/2-1}e^{-x/2}$$"
+    
+  }
+  
+  else if(input$distribucion == "F Fisher"){
+    
+    formula <- "$$F=\\frac{(X/v_1)}{(Y/v_2)}$$"
+    
+  }
+  
+  else if(input$distribucion == "TLC"){
+    
+    formula <- "$$\\bar{X}\\approx N\\left(\\mu,\\frac{\\sigma}{\\sqrt{n}}\\right)$$"
+    
+  }
+  
+  tagList(
+    
+    div(
+      
+      style = "
+      background:#f8f9fa;
+      padding:18px;
+      border-radius:12px;
+      font-size:24px;
+      text-align:center;
+      color:#003366;
+      border:2px solid #d6d6d6;
+      margin-bottom:15px;
+      ",
+      
+      tagList(
+  
+  tags$h3(
+    "Fórmula:",
+    
+    style = "
+    color:#444444;
+    margin-bottom:15px;
+    font-weight:bold;
+    "
+  ),
+  
+  withMathJax(formula)
+  
+)
+      
+    )
+    
+  )
+  
+})
+
+
+```
+
+```{r context="server", echo=FALSE}
+output$resultado_prob <- renderUI({
+  
+  texto <- ""
+  
+  
+  # =====================================
+  # DISTRIBUCIÓN NORMAL
+  # =====================================
+  
+  if(input$distribucion == "Normal"){
+    
+    req(input$media)
+    req(input$desviacion)
+    
+    media <- input$media
+    desviacion <- input$desviacion
+    
+    
+    # MENOR QUE
+    
+    if(input$tipo_prob == "menor"){
+      
+      req(input$limite)
+      
+      prob <- pnorm(
+        input$limite,
+        mean = media,
+        sd = desviacion
+      )
+      
+      texto <- paste0(
+        "P(X ≤ ",
+        input$limite,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+    
+    # MAYOR QUE
+    
+    else if(input$tipo_prob == "mayor"){
+      
+      req(input$limite)
+      
+      prob <- 1 - pnorm(
+        input$limite,
+        mean = media,
+        sd = desviacion
+      )
+      
+      texto <- paste0(
+        "P(X ≥ ",
+        input$limite,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+    
+    # ENTRE DOS VALORES
+    
+    else if(input$tipo_prob == "entre"){
+      
+      req(input$limite_inferior)
+      req(input$limite_superior)
+      
+      prob <- pnorm(
+        input$limite_superior,
+        mean = media,
+        sd = desviacion
+      ) -
+        
+        pnorm(
+          input$limite_inferior,
+          mean = media,
+          sd = desviacion
+        )
+      
+      texto <- paste0(
+        "P(",
+        input$limite_inferior,
+        " ≤ X ≤ ",
+        input$limite_superior,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+  }
+  
+  
+  # =====================================
+  # T STUDENT
+  # =====================================
+  
+  else if(input$distribucion == "T Student"){
+    
+    req(input$gl)
+    
+    gl <- input$gl
+    
+    
+    if(input$tipo_prob == "menor"){
+      
+      req(input$limite)
+      
+      prob <- pt(input$limite, df = gl)
+      
+      texto <- paste0(
+        "P(X ≤ ",
+        input$limite,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "mayor"){
+      
+      req(input$limite)
+      
+      prob <- 1 - pt(input$limite, df = gl)
+      
+      texto <- paste0(
+        "P(X ≥ ",
+        input$limite,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "entre"){
+      
+      req(input$limite_inferior)
+      req(input$limite_superior)
+      
+      prob <- pt(input$limite_superior, df = gl) -
+        pt(input$limite_inferior, df = gl)
+      
+      texto <- paste0(
+        "P(",
+        input$limite_inferior,
+        " ≤ X ≤ ",
+        input$limite_superior,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+  }
+  
+  
+  # =====================================
+  # CHI CUADRADO
+  # =====================================
+  
+  else if(input$distribucion == "Chi Cuadrado"){
+    
+    req(input$gl_chi)
+    
+    gl <- input$gl_chi
+    
+    
+    if(input$tipo_prob == "menor"){
+      
+      req(input$limite)
+      
+      prob <- pchisq(input$limite, df = gl)
+      
+      texto <- paste0(
+        "P(X ≤ ",
+        input$limite,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "mayor"){
+      
+      req(input$limite)
+      
+      prob <- 1 - pchisq(input$limite, df = gl)
+      
+      texto <- paste0(
+        "P(X ≥ ",
+        input$limite,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "entre"){
+      
+      req(input$limite_inferior)
+      req(input$limite_superior)
+      
+      prob <- pchisq(input$limite_superior, df = gl) -
+        pchisq(input$limite_inferior, df = gl)
+      
+      texto <- paste0(
+        "P(",
+        input$limite_inferior,
+        " ≤ X ≤ ",
+        input$limite_superior,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+  }
+  
+  
+  # =====================================
+  # F FISHER
+  # =====================================
+  
+  else if(input$distribucion == "F Fisher"){
+    
+    req(input$gl1)
+    req(input$gl2)
+    
+    gl1 <- input$gl1
+    gl2 <- input$gl2
+    
+    
+    if(input$tipo_prob == "menor"){
+      
+      req(input$limite)
+      
+      prob <- pf(
+        input$limite,
+        df1 = gl1,
+        df2 = gl2
+      )
+      
+      texto <- paste0(
+        "P(X ≤ ",
+        input$limite,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "mayor"){
+      
+      req(input$limite)
+      
+      prob <- 1 - pf(
+        input$limite,
+        df1 = gl1,
+        df2 = gl2
+      )
+      
+      texto <- paste0(
+        "P(X ≥ ",
+        input$limite,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "entre"){
+      
+      req(input$limite_inferior)
+      req(input$limite_superior)
+      
+      prob <- pf(
+        input$limite_superior,
+        df1 = gl1,
+        df2 = gl2
+      ) -
+        
+        pf(
+          input$limite_inferior,
+          df1 = gl1,
+          df2 = gl2
+        )
+      
+      texto <- paste0(
+        "P(",
+        input$limite_inferior,
+        " ≤ X ≤ ",
+        input$limite_superior,
+        ") = ",
+        round(prob, 4)
+      )
+      
+    }
+    
+  }
+  
+  
+  # =====================================
+  # TLC
+  # =====================================
+  
+  else if(input$distribucion == "TLC"){
+    
+    texto <- paste0(
+      "Simulación realizada con ",
+      input$simulaciones,
+      " muestras de tamaño ",
+      input$n
+    )
+    
+  }
+  
+  
+  HTML(
+    
+    paste0(
+      
+      "<div style='
+      
+      background-color:#f8f9fa;
+      
+      padding:18px;
+      
+      border-radius:12px;
+      
+      font-size:24px;
+      
+      font-weight:bold;
+      
+      text-align:center;
+      
+      color:#003366;
+      
+      border:2px solid #d6d6d6;
+      
+      margin-top:10px;
+      
+      '>",
+      
+      texto,
+      
+      "</div>"
+      
+    )
+    
+  )
+  
+})
+```
+
+```{r context="server", echo=FALSE}
+
+grafica_base <- reactive({
+  
+  # =====================================
+  # DISTRIBUCIÓN NORMAL
+  # =====================================
+  
+  if(input$distribucion == "Normal"){
+    
+    req(input$media)
+    req(input$desviacion)
+    
+    media <- input$media
+    desviacion <- input$desviacion
+    
+    x <- seq(
+      media - 4 * desviacion,
+      media + 4 * desviacion,
+      length.out = 2000
+    )
+    
+    y <- dnorm(x, mean = media, sd = desviacion)
+    
+    datos <- data.frame(x, y)
+    
+    grafica <- ggplot2::ggplot(
+      datos,
+      ggplot2::aes(x = x, y = y)
+    ) +
+      
+      ggplot2::geom_line(
+        linewidth = 1.5,
+        color = "#0033ff"
+      ) +
+      
+      ggplot2::theme_minimal(base_size = 15) +
+      
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(
+          face = "bold",
+          size = 20,
+          hjust = 0.5
+        )
+      ) +
+      
+      ggplot2::labs(
+        title = input$titulo_grafica,
+        x = "Valores",
+        y = "Densidad"
+      )
+    
+    
+    # MENOR
+    
+    if(input$tipo_prob == "menor"){
+      
+      sombra <- subset(datos, x <= input$limite)
+      
+      grafica <- grafica +
+        
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#4a90e2",
+          alpha = 0.45
+        ) +
+        
+        ggplot2::geom_vline(
+          xintercept = input$limite,
+          linetype = "dashed",
+          linewidth = 1.2,
+          color = "red"
+        )
+      
+    }
+    
+    
+    # MAYOR
+    
+    else if(input$tipo_prob == "mayor"){
+      
+      sombra <- subset(datos, x >= input$limite)
+      
+      grafica <- grafica +
+        
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#4a90e2",
+          alpha = 0.45
+        ) +
+        
+        ggplot2::geom_vline(
+          xintercept = input$limite,
+          linetype = "dashed",
+          linewidth = 1.2,
+          color = "red"
+        )
+      
+    }
+    
+    
+    # ENTRE
+    
+    else if(input$tipo_prob == "entre"){
+      
+      sombra <- subset(
+        datos,
+        x >= input$limite_inferior &
+          x <= input$limite_superior
+      )
+      
+      grafica <- grafica +
+        
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#4a90e2",
+          alpha = 0.45
+        ) +
+        
+        ggplot2::geom_vline(
+          xintercept = c(
+            input$limite_inferior,
+            input$limite_superior
+          ),
+          linetype = "dashed",
+          linewidth = 1.2,
+          color = "red"
+        )
+      
+    }
+    
+  }
+  
+  
+  # =====================================
+  # T STUDENT
+  # =====================================
+  
+  else if(input$distribucion == "T Student"){
+    
+    req(input$gl)
+    
+    gl <- input$gl
+    
+    x <- seq(
+      qt(0.001, df = gl),
+      qt(0.999, df = gl),
+      length.out = 2000
+    )
+    
+    y <- dt(x, df = gl)
+    
+    datos <- data.frame(x, y)
+    
+    grafica <- ggplot2::ggplot(
+      datos,
+      ggplot2::aes(x = x, y = y)
+    ) +
+      
+      ggplot2::geom_line(
+        linewidth = 1.5,
+        color = "#009933"
+      ) +
+      
+      ggplot2::theme_minimal(base_size = 15) +
+      
+      ggplot2::labs(
+        title = input$titulo_grafica,
+        x = "Valores",
+        y = "Densidad"
+      )
+    
+    
+    if(input$tipo_prob == "menor"){
+      
+      sombra <- subset(datos, x <= input$limite)
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#66cc99",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = input$limite,
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "mayor"){
+      
+      sombra <- subset(datos, x >= input$limite)
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#66cc99",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = input$limite,
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+    
+    else{
+      
+      sombra <- subset(
+        datos,
+        x >= input$limite_inferior &
+          x <= input$limite_superior
+      )
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#66cc99",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = c(
+            input$limite_inferior,
+            input$limite_superior
+          ),
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+  }
+  
+  
+  # =====================================
+  # CHI CUADRADO
+  # =====================================
+  
+  else if(input$distribucion == "Chi Cuadrado"){
+    
+    req(input$gl_chi)
+    
+    gl <- input$gl_chi
+    
+    x <- seq(
+      0,
+      qchisq(0.999, df = gl),
+      length.out = 2000
+    )
+    
+    y <- dchisq(x, df = gl)
+    
+    datos <- data.frame(x, y)
+    
+    grafica <- ggplot2::ggplot(
+      datos,
+      ggplot2::aes(x = x, y = y)
+    ) +
+      
+      ggplot2::geom_line(
+        linewidth = 1.5,
+        color = "#cc6600"
+      ) +
+      
+      ggplot2::theme_minimal(base_size = 15) +
+      
+      ggplot2::labs(
+        title = input$titulo_grafica,
+        x = "Valores",
+        y = "Densidad"
+      )
+    
+    
+    if(input$tipo_prob == "menor"){
+      
+      sombra <- subset(datos, x <= input$limite)
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#ffb366",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = input$limite,
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "mayor"){
+      
+      sombra <- subset(datos, x >= input$limite)
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#ffb366",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = input$limite,
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+    
+    else{
+      
+      sombra <- subset(
+        datos,
+        x >= input$limite_inferior &
+          x <= input$limite_superior
+      )
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#ffb366",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = c(
+            input$limite_inferior,
+            input$limite_superior
+          ),
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+  }
+  
+  
+  # =====================================
+  # F FISHER
+  # =====================================
+  
+  else if(input$distribucion == "F Fisher"){
+    
+    req(input$gl1)
+    req(input$gl2)
+    
+    gl1 <- input$gl1
+    gl2 <- input$gl2
+    
+    x <- seq(
+      0,
+      qf(0.999, df1 = gl1, df2 = gl2),
+      length.out = 2000
+    )
+    
+    y <- df(x, df1 = gl1, df2 = gl2)
+    
+    datos <- data.frame(x, y)
+    
+    grafica <- ggplot2::ggplot(
+      datos,
+      ggplot2::aes(x = x, y = y)
+    ) +
+      
+      ggplot2::geom_line(
+        linewidth = 1.5,
+        color = "#9900cc"
+      ) +
+      
+      ggplot2::theme_minimal(base_size = 15) +
+      
+      ggplot2::labs(
+        title = input$titulo_grafica,
+        x = "Valores",
+        y = "Densidad"
+      )
+    
+    
+    if(input$tipo_prob == "menor"){
+      
+      sombra <- subset(datos, x <= input$limite)
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#cc99ff",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = input$limite,
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+    
+    else if(input$tipo_prob == "mayor"){
+      
+      sombra <- subset(datos, x >= input$limite)
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#cc99ff",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = input$limite,
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+    
+    else{
+      
+      sombra <- subset(
+        datos,
+        x >= input$limite_inferior &
+          x <= input$limite_superior
+      )
+      
+      grafica <- grafica +
+        ggplot2::geom_area(
+          data = sombra,
+          fill = "#cc99ff",
+          alpha = 0.45
+        ) +
+        ggplot2::geom_vline(
+          xintercept = c(
+            input$limite_inferior,
+            input$limite_superior
+          ),
+          linetype = "dashed",
+          color = "red"
+        )
+      
+    }
+    
+  }
+  
+  
+  # =====================================
+  # TLC
+  # =====================================
+  
+  else if(input$distribucion == "TLC"){
+    
+    req(input$n)
+    req(input$simulaciones)
+    
+    medias <- replicate(
+      input$simulaciones,
+      {
+        mean(
+          rbinom(
+            input$n,
+            size = input$k_binomial,
+            prob = input$p_binomial
+          )
+        )
+      }
+    )
+    
+    datos <- data.frame(medias = medias)
+    
+    grafica <- ggplot2::ggplot(
+      datos,
+      ggplot2::aes(x = medias)
+    ) +
+      
+      ggplot2::geom_histogram(
+        ggplot2::aes(y = ..density..),
+        bins = 30,
+        fill = "#91cc02",
+        color = "white"
+      ) +
+      
+      ggplot2::theme_minimal(base_size = 15) +
+      
+      ggplot2::labs(
+        title = input$titulo_grafica,
+        x = "Media",
+        y = "Densidad"
+      )
+    
+  }
+  
+  grafica
+  
+})
+
+
+
+output$grafica <- plotly::renderPlotly({
+  
+  p <- plotly::ggplotly(
+    grafica_base()
+  )
+  
+  plotly::config(
+    
+    p,
+    
+    displaylogo = FALSE,
+    
+    modeBarButtonsToRemove = list(
+      "pan2d",
+      "select2d",
+      "lasso2d",
+      "zoomIn2d",
+      "zoomOut2d",
+      "autoScale2d",
+      "hoverClosestCartesian",
+      "hoverCompareCartesian",
+      "toggleSpikelines"
+    )
+    
+  )
+  
+})
+
+```
+
+```{r context="server", echo=FALSE}
+
+output$descargar_reporte <- downloadHandler(
+  
+  filename = function() {
+    
+    nombre <- gsub(" ", "_", input$distribucion)
+    
+    paste0(
+      "Reporte_",
+      nombre,
+      "_",
+      Sys.Date(),
+      ".png"
+    )
+    
+  },
+  
+  contentType = "image/png",
+  
+  content = function(file) {
+    
+    resultado <- ""
+    formula_texto <- ""
+    formula_mostrar <- ""
+    
+    
+    # =====================================
+    # NORMAL
+    # =====================================
+    
+    if(input$distribucion == "Normal"){
+      
+      formula_texto <- "Distribución Normal"
+      
+      formula_mostrar <- "$Z=\\frac{X-\\mu}{\\sigma}\\;\\;\\; f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}(\\frac{x-\\mu}{\\sigma})^2}$"
+      
+      if(input$tipo_prob == "menor"){
+        
+        prob <- pnorm(
+          input$limite,
+          mean = input$media,
+          sd = input$desviacion
+        )
+        
+        resultado <- paste0(
+          "P(X ≤ ",
+          input$limite,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      } else if(input$tipo_prob == "mayor"){
+        
+        prob <- 1 - pnorm(
+          input$limite,
+          mean = input$media,
+          sd = input$desviacion
+        )
+        
+        resultado <- paste0(
+          "P(X ≥ ",
+          input$limite,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      } else{
+        
+        prob <- pnorm(
+          input$limite_superior,
+          mean = input$media,
+          sd = input$desviacion
+        ) -
+          pnorm(
+            input$limite_inferior,
+            mean = input$media,
+            sd = input$desviacion
+          )
+        
+        resultado <- paste0(
+          "P(",
+          input$limite_inferior,
+          " ≤ X ≤ ",
+          input$limite_superior,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      }
+      
+    }
+    
+    
+    # =====================================
+    # T STUDENT
+    # =====================================
+    
+    else if(input$distribucion == "T Student"){
+      
+      formula_texto <- "Distribución T Student"
+      
+      formula_mostrar <- "$T=\\frac{Z}{\\sqrt{V/v}}$"
+      
+      if(input$tipo_prob == "menor"){
+        
+        prob <- pt(input$limite, df = input$gl)
+        
+        resultado <- paste0(
+          "P(X ≤ ",
+          input$limite,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      } else if(input$tipo_prob == "mayor"){
+        
+        prob <- 1 - pt(input$limite, df = input$gl)
+        
+        resultado <- paste0(
+          "P(X ≥ ",
+          input$limite,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      } else{
+        
+        prob <- pt(input$limite_superior, df = input$gl) -
+          pt(input$limite_inferior, df = input$gl)
+        
+        resultado <- paste0(
+          "P(",
+          input$limite_inferior,
+          " ≤ X ≤ ",
+          input$limite_superior,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      }
+      
+    }
+    
+    
+    # =====================================
+    # CHI CUADRADO
+    # =====================================
+    
+    else if(input$distribucion == "Chi Cuadrado"){
+      
+      formula_texto <- "Distribución Chi Cuadrado"
+      
+      formula_mostrar <- "$f(x)=\\frac{1}{2^{k/2}\\Gamma(k/2)}x^{k/2-1}e^{-x/2}$"
+      
+      if(input$tipo_prob == "menor"){
+        
+        prob <- pchisq(input$limite, df = input$gl_chi)
+        
+        resultado <- paste0(
+          "P(X ≤ ",
+          input$limite,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      } else if(input$tipo_prob == "mayor"){
+        
+        prob <- 1 - pchisq(input$limite, df = input$gl_chi)
+        
+        resultado <- paste0(
+          "P(X ≥ ",
+          input$limite,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      } else{
+        
+        prob <- pchisq(
+          input$limite_superior,
+          df = input$gl_chi
+        ) -
+          pchisq(
+            input$limite_inferior,
+            df = input$gl_chi
+          )
+        
+        resultado <- paste0(
+          "P(",
+          input$limite_inferior,
+          " ≤ X ≤ ",
+          input$limite_superior,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      }
+      
+    }
+    
+    
+    # =====================================
+    # F FISHER
+    # =====================================
+    
+    else if(input$distribucion == "F Fisher"){
+      
+      formula_texto <- "Distribución F Fisher"
+      
+      formula_mostrar <- "$F=\\frac{(X/v_1)}{(Y/v_2)}$"    
+      if(input$tipo_prob == "menor"){
+        
+        prob <- pf(
+          input$limite,
+          df1 = input$gl1,
+          df2 = input$gl2
+        )
+        
+        resultado <- paste0(
+          "P(X ≤ ",
+          input$limite,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      } else if(input$tipo_prob == "mayor"){
+        
+        prob <- 1 - pf(
+          input$limite,
+          df1 = input$gl1,
+          df2 = input$gl2
+        )
+        
+        resultado <- paste0(
+          "P(X ≥ ",
+          input$limite,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      } else{
+        
+        prob <- pf(
+          input$limite_superior,
+          df1 = input$gl1,
+          df2 = input$gl2
+        ) -
+          pf(
+            input$limite_inferior,
+            df1 = input$gl1,
+            df2 = input$gl2
+          )
+        
+        resultado <- paste0(
+          "P(",
+          input$limite_inferior,
+          " ≤ X ≤ ",
+          input$limite_superior,
+          ") = ",
+          round(prob, 4)
+        )
+        
+      }
+      
+    }
+    
+    
+    # =====================================
+    # TLC
+    # =====================================
+    
+    else{
+      
+      formula_texto <- "Teorema del Límite Central"
+      
+      formula_mostrar <- "$\\bar{X}\\approx N(\\mu,\\frac{\\sigma}{\\sqrt{n}})$"
+      
+      resultado <- paste0(
+        "Simulación con ",
+        input$simulaciones,
+        " muestras de tamaño ",
+        input$n
+      )
+      
+    }
+    
+    
+    # =====================================
+    # CREAR PNG
+    # =====================================
+    
+    png(
+      file,
+      width = 1800,
+      height = 1400,
+      res = 180,
+      bg = "white"
+    )
+    
+    grid::grid.newpage()
+    
+    
+    # TÍTULO
+    
+    grid::grid.text(
+      formula_texto,
+      y = 0.96,
+      gp = grid::gpar(
+        fontsize = 26,
+        fontface = "bold",
+        col = "#003366"
+      )
+    )
+    
+    
+    # SUBTÍTULO
+    
+    grid::grid.text(
+      "Fórmula:",
+      y = 0.90,
+      gp = grid::gpar(
+        fontsize = 20,
+        fontface = "bold",
+        col = "#444444"
+      )
+    )
+    
+    
+    # FÓRMULA
+    
+    grid::grid.draw(
+      
+      grid::textGrob(
+        
+        label = latex2exp::TeX(formula_mostrar),
+        
+        y = 0.84,
+        
+        gp = grid::gpar(
+          fontsize = 16,
+          col = "#003366"
+        )
+        
+      )
+      
+    )
+    
+    
+    # RESULTADO
+    
+    grid::grid.text(
+      resultado,
+      y = 0.75,
+      gp = grid::gpar(
+        fontsize = 22,
+        fontface = "bold",
+        col = "#003366"
+      )
+    )
+    
+    
+    # GRÁFICA
+    
+    print(
+      
+      grafica_base(),
+      
+      vp = grid::viewport(
+        x = 0.5,
+        y = 0.32,
+        width = 0.90,
+        height = 0.55
+      )
+      
+    )
+    
+    
+    dev.off()
+    
+  }
+  
+)
+
+
+```
